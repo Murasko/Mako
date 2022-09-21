@@ -1,4 +1,6 @@
+from distutils.cmd import Command
 import discord
+from discord.ext import commands
 import os
 from dotenv import load_dotenv
 
@@ -8,18 +10,22 @@ token = os.getenv('TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
 
-muraskoBot = discord.Client(intents=intents)
+client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='$')
 
-@muraskoBot.event
+@client.event
 async def on_ready():
-    print(f'Bot {muraskoBot.user} logged in!')
+    print(f'Bot {client.user} logged in!')
 
-@muraskoBot.event
+@client.event
 async def on_message(message):
-    if message.author == muraskoBot.user:
+    if message.author == client.user:
         return
     
     if message.content.lower() == "hi":
         await message.channel.send('Sup!')
 
-muraskoBot.run(token)
+    if message.content.lower() == "käsekuchen":
+        await message.channel.send('Beste Kuchen!')
+
+client.run(token)
