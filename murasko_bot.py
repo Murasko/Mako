@@ -25,7 +25,7 @@ async def on_message(message):
     if message.content.lower() == "hi":
         await message.channel.send('Sup!')
 
-    if message.content.lower() == "käsekuchen":
+    if "käsekuchen" in message.content.lower():
         await message.channel.send('Beste Kuchen!')
 
 client.run(token)
