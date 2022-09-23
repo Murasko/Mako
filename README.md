@@ -14,5 +14,5 @@ python -m pip install python-dotenv
 
 Create .env File and add Discord Bot token
 ```
-echo "TOKEN='Token'" > .env
+echo "TOKEN='insert-token-here'" > .env
 ```
