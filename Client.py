@@ -1,6 +1,7 @@
 import discord
 import os
 import asyncio
+import random
 from dotenv import load_dotenv
 from discord.ext import commands
 
@@ -39,13 +40,49 @@ async def on_ready():
 async def on_message(message):
     if message.author.bot:
         return
-    if message.content == "hi":
+    if message.content == "Hi".lower():
         await message.channel.send('Sup!')
     await bot.process_commands(message)
 
 
-@bot.command()
+@bot.event
+async def on_member_join(member):
+    system_channel = member.guild.system_channel
+    await system_channel.send(f'Hallo {member.mention}, schön das du hier bist.')
+
+
+@bot.hybrid_command()
 async def ping(ctx):
     await ctx.reply(f'Pong! {round(bot.latency * 1000)}ms.')
+
+
+@bot.hybrid_command(aliases=["muschel", "q"])
+async def eightball(ctx, *, question):
+    answers = ["Na sicher doch", "Was denkst du wer du bist"]
+    await ctx.reply(f'**Frage: ** {question}\n **Antwort: ** {random.choice(answers)}')
+
+
+@bot.hybrid_command()
+async def userinfo(ctx, member: discord.Member = None):
+    if member is None:
+        member = ctx.author
+
+    name = member.display_name
+    pfp = member.display_avatar
+
+    roles = []
+    for i in member.roles:
+        if i.name == "@everyone":
+            pass
+        else:
+            roles.append(str(i.name))
+
+    embed = discord.Embed(title=f'Userinformation für {name}', colour=discord.Colour.random())
+    embed.set_thumbnail(url=pfp)
+    embed.add_field(name="Joined Server: ", value=member.joined_at.strftime("%d/%m/%Y"))
+    embed.add_field(name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y"))
+    embed.add_field(name="Roles: ", value=roles, inline=False)
+
+    await ctx.reply(embed=embed)
 
 bot.run(token)
