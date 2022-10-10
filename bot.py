@@ -33,8 +33,8 @@ async def change_status():
                 type=discord.ActivityType.watching,
                 name="über euch alle",
                 state=discord.Status.online))
-            await asyncio.sleep(60)
-            await bot.change_presence(activity=discord.Game("$help"))
+            #await asyncio.sleep(60)
+            #await bot.change_presence(activity=discord.Game("$help"))
         except Exception as e:
             print(e)
 
@@ -42,7 +42,7 @@ async def change_status():
 async def check_twitch_online():
     while True:
         try:
-            channel = bot.get_channel(1029034984767500298)
+            channel = bot.get_channel(1029147523593551942)
             if not channel:
                 return
 
@@ -69,10 +69,10 @@ async def on_ready():
     bot.loop.create_task(check_twitch_online())
 
 
-@bot.event
+"""@bot.event
 async def on_member_join(member):
     system_channel = member.guild.system_channel
-    await system_channel.send(f'Hallo {member.mention}, schön das du hier bist.')
+    await system_channel.send(f'Hallo {member.mention}, schön das du hier bist.')"""
 
 
 @bot.slash_command()
@@ -80,10 +80,10 @@ async def ping(ctx):
     await ctx.respond(f'Pong! {round(bot.latency * 1000)}ms.')
 
 
-@bot.slash_command()
+"""@bot.slash_command()
 async def eightball(ctx, *, question):
     answers = ["Na sicher doch", "Was denkst du wer du bist"]
-    await ctx.respond(f'**Frage: ** {question}\n **Antwort: ** {random.choice(answers)}')
+    await ctx.respond(f'**Frage: ** {question}\n **Antwort: ** {random.choice(answers)}')"""
 
 
 @bot.slash_command()
