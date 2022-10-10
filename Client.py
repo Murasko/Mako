@@ -3,18 +3,14 @@ import os
 import asyncio
 import random
 from dotenv import load_dotenv
-from discord.ext import commands
+
 
 load_dotenv()
 token = os.getenv('TOKEN')
 
 intents = discord.Intents.all()
 
-bot = commands.Bot(
-    command_prefix="!",
-    help_command=None,
-    intents=intents
-)
+bot = discord.Bot(intents=intents)
 
 
 async def change_status():
@@ -51,18 +47,18 @@ async def on_member_join(member):
     await system_channel.send(f'Hallo {member.mention}, schön das du hier bist.')
 
 
-@bot.hybrid_command()
+@bot.slash_command()
 async def ping(ctx):
-    await ctx.reply(f'Pong! {round(bot.latency * 1000)}ms.')
+    await ctx.send(f'Pong! {round(bot.latency * 1000)}ms.')
 
 
-@bot.hybrid_command(aliases=["muschel", "q"])
+@bot.slash_command(aliases=["muschel", "q"])
 async def eightball(ctx, *, question):
     answers = ["Na sicher doch", "Was denkst du wer du bist"]
-    await ctx.reply(f'**Frage: ** {question}\n **Antwort: ** {random.choice(answers)}')
+    await ctx.send(f'**Frage: ** {question}\n **Antwort: ** {random.choice(answers)}')
 
 
-@bot.hybrid_command()
+@bot.slash_command()
 async def userinfo(ctx, member: discord.Member = None):
     if member is None:
         member = ctx.author
@@ -83,6 +79,6 @@ async def userinfo(ctx, member: discord.Member = None):
     embed.add_field(name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y"))
     embed.add_field(name="Roles: ", value=roles, inline=False)
 
-    await ctx.reply(embed=embed)
+    await ctx.send(embed=embed)
 
 bot.run(token)
