@@ -33,8 +33,8 @@ async def change_status():
                 type=discord.ActivityType.watching,
                 name="über euch alle",
                 state=discord.Status.online))
-            #await asyncio.sleep(60)
-            #await bot.change_presence(activity=discord.Game("$help"))
+            # await asyncio.sleep(60)
+            # await bot.change_presence(activity=discord.Game("$help"))
         except Exception as e:
             print(e)
 
@@ -87,11 +87,11 @@ async def eightball(ctx, *, question):
 
 
 @bot.slash_command()
-async def userinfo(ctx, member):
-    # TODO: Implement Userinfo without Params for Command Caller
+async def userinfo(ctx, member: discord.Member = None):
+    if member is None:
+        member = ctx.author
 
     pfp = member.display_avatar
-
     roles = []
     for i in member.roles:
         if i.name == "@everyone":
