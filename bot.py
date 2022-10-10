@@ -57,7 +57,7 @@ async def check_twitch_online():
                 embed.add_field(name="Aktuelle Zuschauer: ", value=notification["viewer_count"], inline=False)
 
                 await channel.send(embed=embed)
-            await asyncio.sleep(20)
+            await asyncio.sleep(90)
         except Exception as e:
             print(e)
 
