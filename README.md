@@ -15,3 +15,8 @@ Create .env File and add Discord Bot token
 ```
 echo "TOKEN='insertTokenHere'" > .env
 ```
+
+Create Bot Executable
+```
+pyinstaller -F --clean -y --workpath build --distpath dist muraskobot.py
+```
