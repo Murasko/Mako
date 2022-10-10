@@ -1,7 +1,7 @@
 # MuraskoBot
 Discord Bot written in Python
 
-Using [discord.py](https://github.com/Rapptz/discord.py)
+Using [pycord](https://github.com/Pycord-Development/pycord)
 
 ## Setup Working dir
 Create the venv with the needed packages
