@@ -66,7 +66,6 @@ async def check_twitch_online():
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
-    # bot.loop.create_task(change_status()
     await change_status()
     bot.loop.create_task(check_twitch_online())
 
@@ -80,12 +79,6 @@ async def on_member_join(member):
 @bot.slash_command()
 async def ping(ctx):
     await ctx.respond(f'Pong! {round(bot.latency * 1000)}ms.')
-
-
-@bot.slash_command()
-async def eightball(ctx, *, question):
-    answers = ["Na sicher doch", "Was denkst du wer du bist"]
-    await ctx.respond(f'**Frage: ** {question}\n **Antwort: ** {random.choice(answers)}')
 
 
 @bot.slash_command()
