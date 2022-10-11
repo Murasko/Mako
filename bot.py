@@ -1,22 +1,27 @@
 """
 TODO:
 - Get a few commands Up and running
-- Implement Twitch Live Messages
 - Rolesystem based on Commands or Reactions
+- Remove Intents.all and set only needed Intents and Persmissions for Bot User
 
 Optional:
 - Implement Setup Wizard
 - Research and implement cogs
 """
+import logging
 import discord
-
 import os
 import asyncio
 import random
 
 from dotenv import load_dotenv
-
 from twitch import get_notifications, get_profile_pictures
+
+logger = logging.getLogger('discord')
+logger.setLevel(logging.INFO)
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
 
 load_dotenv()
 token = os.getenv('TOKEN')
@@ -27,16 +32,13 @@ bot = discord.Bot(intents=intents)
 
 
 async def change_status():
-    while True:
-        try:
-            await bot.change_presence(activity=discord.Activity(
-                type=discord.ActivityType.watching,
-                name="über euch alle",
-                state=discord.Status.online))
-            # await asyncio.sleep(60)
-            # await bot.change_presence(activity=discord.Game("$help"))
-        except Exception as e:
-            print(e)
+    try:
+        await bot.change_presence(activity=discord.Activity(
+            type=discord.ActivityType.watching,
+            name="über euch alle",
+            state=discord.Status.online))
+    except Exception as e:
+        print(e)
 
 
 async def check_twitch_online():
@@ -54,7 +56,6 @@ async def check_twitch_online():
                 embed.set_thumbnail(url=get_profile_pictures(notification["user_id"]))
                 embed.add_field(name="Titel: ", value=notification["title"])
                 embed.add_field(name="Spielt: ", value=notification["game_name"])
-                embed.add_field(name="Aktuelle Zuschauer: ", value=notification["viewer_count"], inline=False)
 
                 await channel.send(embed=embed)
             await asyncio.sleep(90)
@@ -65,14 +66,15 @@ async def check_twitch_online():
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user}')
-    bot.loop.create_task(change_status())
+    # bot.loop.create_task(change_status()
+    await change_status()
     bot.loop.create_task(check_twitch_online())
 
 
-"""@bot.event
+@bot.event
 async def on_member_join(member):
     system_channel = member.guild.system_channel
-    await system_channel.send(f'Hallo {member.mention}, schön das du hier bist.')"""
+    await system_channel.send(f'Hallo {member.mention}, schön das du hier bist.')
 
 
 @bot.slash_command()
@@ -80,10 +82,10 @@ async def ping(ctx):
     await ctx.respond(f'Pong! {round(bot.latency * 1000)}ms.')
 
 
-"""@bot.slash_command()
+@bot.slash_command()
 async def eightball(ctx, *, question):
     answers = ["Na sicher doch", "Was denkst du wer du bist"]
-    await ctx.respond(f'**Frage: ** {question}\n **Antwort: ** {random.choice(answers)}')"""
+    await ctx.respond(f'**Frage: ** {question}\n **Antwort: ** {random.choice(answers)}')
 
 
 @bot.slash_command()
