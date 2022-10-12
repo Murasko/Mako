@@ -67,17 +67,17 @@ def get_notifications():
     streams = get_streams(users)
 
     notifications = []
-    for user_name in config["watchlist"]:
-        if user_name not in online_users:
-            online_users[user_name] = datetime.utcnow()
+    for user in config["watchlist"]:
+        if user not in online_users:
+            online_users[user] = datetime.utcnow()
 
-        if user_name not in streams:
-            online_users[user_name] = None
+        if user not in streams:
+            online_users[user] = None
         else:
             started_at = datetime.strptime(
-                streams[user_name]["started_at"], "%Y-%m-%dT%H:%M:%SZ")
-            if online_users[user_name] is None or started_at > online_users[user_name]:
-                notifications.append(streams[user_name])
-                online_users[user_name] = started_at
+                streams[user]["started_at"], "%Y-%m-%dT%H:%M:%SZ")
+            if online_users[user] is None or started_at > online_users[user]:
+                notifications.append(streams[user])
+                online_users[user] = started_at
 
     return notifications
