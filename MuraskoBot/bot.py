@@ -8,13 +8,13 @@ Optional:
 - Implement Setup Wizard
 - Research and implement cogs
 """
-import discord
-
 import logging
 import os
 import asyncio
 import random
 from dotenv import load_dotenv
+
+import discord
 
 from twitch import get_notifications, get_profile_pictures
 
