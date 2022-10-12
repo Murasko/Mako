@@ -1,26 +1,29 @@
 """
 TODO:
 - Get a few commands Up and running
-- Rolesystem based on Commands or Reactions
+- Rolesystem based on Commands or Reactions, maybe Dropdowns
 - Remove Intents.all and set only needed Intents and Persmissions for Bot User
 
 Optional:
 - Implement Setup Wizard
 - Research and implement cogs
 """
-import logging
 import discord
+
+import logging
 import os
 import asyncio
 import random
-
 from dotenv import load_dotenv
+
 from twitch import get_notifications, get_profile_pictures
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+handler = logging.FileHandler(
+    filename='discord.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter(
+    '%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
 load_dotenv()
@@ -50,12 +53,14 @@ async def check_twitch_online():
 
             notifications = get_notifications()
             for notification in notifications:
-                embed = discord.Embed(title="{} ist Live".format(notification["user_name"]),
-                                      colour=discord.Colour.random())
+                embed = discord.Embed(title="{} ist Live".format(
+                    notification["user_name"]), colour=discord.Colour.random())
                 embed.set_author(name="MuraskoBot")
-                embed.set_thumbnail(url=get_profile_pictures(notification["user_id"]))
+                embed.set_thumbnail(
+                    url=get_profile_pictures(notification["user_id"]))
                 embed.add_field(name="Titel: ", value=notification["title"])
-                embed.add_field(name="Spielt: ", value=notification["game_name"])
+                embed.add_field(name="Spielt: ",
+                                value=notification["game_name"])
 
                 await channel.send(embed=embed)
             await asyncio.sleep(90)
@@ -73,12 +78,14 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
     system_channel = member.guild.system_channel
-    await system_channel.send(f'Hallo {member.mention}, schön das du hier bist.')
+    await system_channel.send(
+        f"Hallo {member.mention}, schön das du hier bist."
+        )
 
 
 @bot.slash_command()
 async def ping(ctx):
-    await ctx.respond(f'Pong! {round(bot.latency * 1000)}ms.')
+    await ctx.respond(f"Pong! {round(bot.latency * 1000)}ms.")
 
 
 @bot.slash_command()
@@ -94,10 +101,13 @@ async def userinfo(ctx, member: discord.Member = None):
         else:
             roles.append(str(i.name))
 
-    embed = discord.Embed(title=f'Userinformation für {member}', colour=discord.Colour.random())
+    embed = discord.Embed(
+        title=f'Userinformation für {member}', colour=discord.Colour.random())
     embed.set_thumbnail(url=pfp)
-    embed.add_field(name="Joined Server: ", value=member.joined_at.strftime("%d/%m/%Y"))
-    embed.add_field(name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y"))
+    embed.add_field(name="Joined Server: ",
+                    value=member.joined_at.strftime("%d/%m/%Y"))
+    embed.add_field(name="Joined Discord: ",
+                    value=member.created_at.strftime("%d/%m/%Y"))
     embed.add_field(name="Roles: ", value=str(roles), inline=False)
 
     await ctx.respond(embed=embed)
