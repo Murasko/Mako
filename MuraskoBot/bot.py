@@ -79,8 +79,7 @@ async def on_ready():
 async def on_member_join(member):
     system_channel = member.guild.system_channel
     await system_channel.send(
-        f"Hallo {member.mention}, schön das du hier bist."
-        )
+        f"Hallo {member.mention}, schön das du hier bist.")
 
 
 @bot.slash_command()
