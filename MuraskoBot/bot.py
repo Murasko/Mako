@@ -72,7 +72,7 @@ async def check_twitch_online():
 async def on_ready():
     print(f'Logged in as {bot.user}')
     await change_status()
-    check_twitch_online.start()
+    await check_twitch_online.start()
 
 
 @bot.event
