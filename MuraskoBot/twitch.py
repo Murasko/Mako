@@ -5,7 +5,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from pathlib import Path
 
-with open("config.json") as config_file:
+with open("../config.json") as config_file:
     config = json.load(config_file)
 
 env_path = Path('.', ".env")
@@ -19,10 +19,8 @@ def get_app_access_token():
         "grant_type": "client_credentials"
     }
 
-    response = requests.post(
-        "https://id.twitch.tv/oauth2/token", params=params)
+    response = requests.post("https://id.twitch.tv/oauth2/token", params=params)
     access_token = response.json()["access_token"]
-
     return access_token
 
 
@@ -47,18 +45,17 @@ def get_streams(users):
     }
 
     headers = {
-        "Authorization": "Bearer {}".format(config["access_token"]),
+        "Authorization": "Bearer {}".format(config["ACCESS_TOKEN"]),
         "Client-Id": config["client_id"]
     }
 
-    response = requests.get(
-        "https://api.twitch.tv/helix/streams", params=params, headers=headers)
+    response = requests.get("https://api.twitch.tv/helix/streams", params=params, headers=headers)
     return {entry["user_login"]: entry for entry in response.json()["data"]}
 
 
 def get_profile_pictures(userid):
     headers = {
-        "Authorization": "Bearer {}".format(config["access_token"]),
+        "Authorization": "Bearer {}".format(config["ACCESS_TOKEN"]),
         "Client-Id": config["client_id"]
     }
     response = requests.get(

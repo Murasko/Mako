@@ -8,12 +8,12 @@ Optional:
 - Implement Setup Wizard
 - Research and implement cogs
 """
+import asyncio
 import logging
 import os
-import asyncio
-from dotenv import load_dotenv
 
 import discord
+from dotenv import load_dotenv
 
 from twitch import get_notifications, get_profile_pictures
 
@@ -58,7 +58,7 @@ async def check_twitch_online():
             for notification in notifications:
                 embed = discord.Embed(
                     title="{} ist Live".format(notification["user_name"]),
-                    colour=discord.Colour.random(),
+                    colour=discord.Colour.random()
                 )
                 embed.set_author(name="MuraskoBot")
                 embed.set_thumbnail(url=get_profile_pictures(notification["user_id"]))
@@ -66,7 +66,7 @@ async def check_twitch_online():
                 embed.add_field(name="Spielt: ", value=notification["game_name"])
 
                 await channel.send(embed=embed)
-            asyncio.sleep(300)
+            await asyncio.sleep(300)
         except Exception as e:
             print(e)
 
@@ -102,15 +102,11 @@ async def userinfo(ctx, member: discord.Member = None):
         else:
             roles.append(str(i.name))
 
-    embed = discord.Embed(
-        title=f"Userinformation für {member}", colour=discord.Colour.random()
-    )
+    embed = discord.Embed(title=f"Userinformation für {member}", colour=discord.Colour.random())
     embed.set_thumbnail(url=pfp)
-    embed.add_field(name="Joined Server: ",
-                    value=member.joined_at.strftime("%d/%m/%Y"))
+    embed.add_field(name="Joined Server: ", value=member.joined_at.strftime("%d/%m/%Y"))
     embed.add_field(
-        name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y")
-    )
+        name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y"))
     embed.add_field(name="Roles: ", value=str(roles), inline=False)
 
     await ctx.respond(embed=embed)
