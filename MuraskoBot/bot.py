@@ -11,10 +11,10 @@ Optional:
 import logging
 import os
 import asyncio
-import random
 from dotenv import load_dotenv
 
 import discord
+from discord.ext import tasks
 
 from twitch import get_notifications, get_profile_pictures
 
@@ -44,6 +44,7 @@ async def change_status():
         print(e)
 
 
+@tasks.loop(minutes=5)
 async def check_twitch_online():
     while True:
         try:
@@ -63,7 +64,6 @@ async def check_twitch_online():
                                 value=notification["game_name"])
 
                 await channel.send(embed=embed)
-            await asyncio.sleep(90)
         except Exception as e:
             print(e)
 
@@ -72,7 +72,7 @@ async def check_twitch_online():
 async def on_ready():
     print(f'Logged in as {bot.user}')
     await change_status()
-    bot.loop.create_task(check_twitch_online())
+    check_twitch_online.start()
 
 
 @bot.event
