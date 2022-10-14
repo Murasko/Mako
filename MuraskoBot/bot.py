@@ -75,7 +75,7 @@ async def check_twitch_online():
 async def on_ready():
     print(f"Logged in as {bot.user}")
     await change_status()
-    await check_twitch_online()
+    bot.loop.create_task(check_twitch_online())
 
 
 @bot.event
