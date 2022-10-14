@@ -13,6 +13,7 @@ import logging
 import os
 
 import discord
+from discord.ext import tasks
 from dotenv import load_dotenv
 
 from twitch import get_notifications, get_profile_pictures
@@ -47,35 +48,35 @@ async def change_status():
         print(e)
 
 
+@tasks.loop(seconds=30)
 async def check_twitch_online():
-    while True:
-        try:
-            channel = bot.get_channel(1029147523593551942)
-            if not channel:
-                return
+    try:
+        channel = bot.get_channel(int(os.getenv("NOTIFY_CHANNEL")))
+        print("Echo Twitch")
+        if not channel:
+            return
 
-            notifications = get_notifications()
-            for notification in notifications:
-                embed = discord.Embed(
-                    title="{} ist Live".format(notification["user_name"]),
-                    colour=discord.Colour.random()
-                )
-                embed.set_author(name="MuraskoBot")
-                embed.set_thumbnail(url=get_profile_pictures(notification["user_id"]))
-                embed.add_field(name="Titel: ", value=notification["title"])
-                embed.add_field(name="Spielt: ", value=notification["game_name"])
+        notifications = get_notifications()
+        for notification in notifications:
+            embed = discord.Embed(
+                title="{} ist Live".format(notification["user_name"]),
+                colour=discord.Colour.random()
+            )
+            embed.set_author(name="MuraskoBot")
+            embed.set_thumbnail(url=get_profile_pictures(notification["user_id"]))
+            embed.add_field(name="Titel: ", value=notification["title"])
+            embed.add_field(name="Spielt: ", value=notification["game_name"])
 
-                await channel.send(embed=embed)
-            await asyncio.sleep(300)
-        except Exception as e:
-            print(e)
+            await channel.send(embed=embed)
+    except Exception as e:
+        print(e)
 
 
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
     await change_status()
-    bot.loop.create_task(check_twitch_online())
+    await check_twitch_online.start()
 
 
 @bot.event

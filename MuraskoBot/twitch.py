@@ -31,7 +31,7 @@ def get_users(login_names):
 
     headers = {
         "Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}",
-        "Client-Id": config["client_id"]
+        "Client-Id": os.getenv("CLIENT_ID")
     }
 
     response = requests.get(
@@ -45,8 +45,8 @@ def get_streams(users):
     }
 
     headers = {
-        "Authorization": "Bearer {}".format(config["ACCESS_TOKEN"]),
-        "Client-Id": config["client_id"]
+        "Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}",
+        "Client-Id": os.getenv("CLIENT_ID")
     }
 
     response = requests.get("https://api.twitch.tv/helix/streams", params=params, headers=headers)
@@ -55,8 +55,8 @@ def get_streams(users):
 
 def get_profile_pictures(userid):
     headers = {
-        "Authorization": "Bearer {}".format(config["ACCESS_TOKEN"]),
-        "Client-Id": config["client_id"]
+        "Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}",
+        "Client-Id": os.getenv("CLIENT_ID")
     }
     response = requests.get(
         f"https://api.twitch.tv/helix/users?id={userid}", headers=headers)
