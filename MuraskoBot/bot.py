@@ -48,11 +48,10 @@ async def change_status():
         print(e)
 
 
-@tasks.loop(seconds=30)
+@tasks.loop(minutes=5)
 async def check_twitch_online():
     try:
         channel = bot.get_channel(int(os.getenv("NOTIFY_CHANNEL")))
-        print("Echo Twitch")
         if not channel:
             return
 
