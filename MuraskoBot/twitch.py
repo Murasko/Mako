@@ -5,7 +5,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from pathlib import Path
 
-with open("../config.json") as cfile:
+with open("config.json") as cfile:
     config = json.load(cfile)
 
 env_path = Path('.', ".env")
