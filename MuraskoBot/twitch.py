@@ -34,8 +34,7 @@ def get_users(login_names):
         "Client-Id": os.getenv("CLIENT_ID")
     }
 
-    response = requests.get(
-        "https://api.twitch.tv/helix/users", params=params, headers=headers)
+    response = requests.get("https://api.twitch.tv/helix/users", params=params, headers=headers)
     return {entry["login"]: entry["id"] for entry in response.json()["data"]}
 
 
@@ -58,8 +57,7 @@ def get_profile_pictures(userid):
         "Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}",
         "Client-Id": os.getenv("CLIENT_ID")
     }
-    response = requests.get(
-        f"https://api.twitch.tv/helix/users?id={userid}", headers=headers)
+    response = requests.get(f"https://api.twitch.tv/helix/users?id={userid}", headers=headers)
     return response.json()["data"][0]["profile_image_url"]
 
 

@@ -20,11 +20,8 @@ from twitch import get_notifications, get_profile_pictures
 
 logger = logging.getLogger("discord")
 logger.setLevel(logging.INFO)
-handler = logging.FileHandler(filename="discord.log",
-                              encoding="utf-8", mode="w")
-handler.setFormatter(
-    logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
-)
+handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
 logger.addHandler(handler)
 
 load_dotenv()
@@ -41,7 +38,7 @@ async def change_status():
             activity=discord.Activity(
                 type=discord.ActivityType.watching,
                 name="über euch alle",
-                state=discord.Status.online,
+                state=discord.Status.online
             )
         )
     except Exception as e:
@@ -105,8 +102,7 @@ async def userinfo(ctx, member: discord.Member = None):
     embed = discord.Embed(title=f"Userinformation für {member}", colour=discord.Colour.random())
     embed.set_thumbnail(url=pfp)
     embed.add_field(name="Joined Server: ", value=member.joined_at.strftime("%d/%m/%Y"))
-    embed.add_field(
-        name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y"))
+    embed.add_field(name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y"))
     embed.add_field(name="Roles: ", value=str(roles), inline=False)
 
     await ctx.respond(embed=embed)
