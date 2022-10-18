@@ -2,20 +2,19 @@ import os
 import requests
 import json
 from datetime import datetime
+
 from dotenv import load_dotenv
-from pathlib import Path
 
 with open("config.json") as cfile:
     config = json.load(cfile)
 
-env_path = Path('.', ".env")
-load_dotenv(dotenv_path=env_path)
+load_dotenv()
 
 
 def get_app_access_token():
     params = {
-        "client_id": os.getenv("CLIENT_ID"),
-        "client_secret": os.getenv("CLIENT_SECRET"),
+        "client_id": os.environ["CLIENT_ID"],
+        "client_secret": os.environ["CLIENT_SECRET"],
         "grant_type": "client_credentials"
     }
 
@@ -30,8 +29,8 @@ def get_users(login_names):
     }
 
     headers = {
-        "Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}",
-        "Client-Id": os.getenv("CLIENT_ID")
+        "Authorization": f"Bearer {os.environ['ACCESS_TOKEN']}",
+        "Client-Id": os.environ["CLIENT_ID"]
     }
 
     response = requests.get("https://api.twitch.tv/helix/users", params=params, headers=headers)
@@ -44,8 +43,8 @@ def get_streams(users):
     }
 
     headers = {
-        "Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}",
-        "Client-Id": os.getenv("CLIENT_ID")
+        "Authorization": f"Bearer {os.environ['ACCESS_TOKEN']}",
+        "Client-Id": os.environ["CLIENT_ID"]
     }
 
     response = requests.get("https://api.twitch.tv/helix/streams", params=params, headers=headers)
@@ -54,8 +53,8 @@ def get_streams(users):
 
 def get_profile_pictures(userid):
     headers = {
-        "Authorization": f"Bearer {os.getenv('ACCESS_TOKEN')}",
-        "Client-Id": os.getenv("CLIENT_ID")
+        "Authorization": f"Bearer {os.environ['ACCESS_TOKEN']}",
+        "Client-Id": os.environ["CLIENT_ID"]
     }
     response = requests.get(f"https://api.twitch.tv/helix/users?id={userid}", headers=headers)
     return response.json()["data"][0]["profile_image_url"]
@@ -69,7 +68,7 @@ def get_notifications():
     streams = get_streams(users)
 
     notifications = []
-    for user in config["watchlist"]:
+    for user in users:
         if user not in online_users:
             online_users[user] = datetime.utcnow()
 
