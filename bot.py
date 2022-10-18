@@ -1,21 +1,12 @@
-"""
-TODO:
-- Get a few commands Up and running
-- Rolesystem based on Commands or Reactions, maybe Dropdowns
-- Remove Intents.all and set only needed Intents and Persmissions for Bot User
+from src.twitch.twitch import get_profile_pictures, get_notifications
 
-Optional:
-- Implement Setup Wizard
-- Research and implement cogs
-"""
 import logging
 import os
+from dotenv import load_dotenv
 
 import discord
 from discord.ext import tasks
-from dotenv import load_dotenv
 
-from twitch import get_notifications, get_profile_pictures
 
 logger = logging.getLogger("discord")
 logger.setLevel(logging.INFO)
@@ -26,7 +17,6 @@ handler.setFormatter(
 logger.addHandler(handler)
 
 load_dotenv()
-token = os.environ["TOKEN"]
 
 intents = discord.Intents.all()
 
@@ -42,6 +32,7 @@ async def change_status():
                 state=discord.Status.online,
             )
         )
+        print("Status set!")
     except Exception as e:
         print(e)
 
@@ -80,7 +71,7 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
     system_channel = member.guild.system_channel
-    await system_channel.send(f"Hallo {member.mention}, schön das du hier bist.")
+    await system_channel.send(f"Hi {member.mention}, viel Spaß hier!")
 
 
 @bot.slash_command()
@@ -115,4 +106,4 @@ async def userinfo(ctx, member: discord.Member = None):
 
 
 if __name__ == "__main__":
-    bot.run(token)
+    bot.run(os.environ["TOKEN"])
