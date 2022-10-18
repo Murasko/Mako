@@ -2,7 +2,7 @@
 Discord Bot written in Python, using [pycord](https://github.com/Pycord-Development/pycord)
 
 ## Setup Working dir
-Using Pipenv
+Setup your working Directory with the following Commands
 ```
 python -m venv venv
 source venv/bin/activate
