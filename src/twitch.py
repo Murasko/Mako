@@ -10,6 +10,11 @@ with open("config.json") as cfile:
 
 load_dotenv()
 
+__headers = {
+    "Authorization": f"Bearer {os.environ['ACCESS_TOKEN']}",
+    "Client-Id": os.environ["CLIENT_ID"]
+}
+
 
 def get_app_access_token():
     params = {
@@ -28,10 +33,7 @@ def get_users(login_names):
         "login": login_names
     }
 
-    headers = {
-        "Authorization": f"Bearer {os.environ['ACCESS_TOKEN']}",
-        "Client-Id": os.environ["CLIENT_ID"]
-    }
+    headers = __headers
 
     response = requests.get("https://api.twitch.tv/helix/users", params=params, headers=headers)
     return {entry["login"]: entry["id"] for entry in response.json()["data"]}
@@ -42,20 +44,14 @@ def get_streams(users):
         "user_id": users.values()
     }
 
-    headers = {
-        "Authorization": f"Bearer {os.environ['ACCESS_TOKEN']}",
-        "Client-Id": os.environ["CLIENT_ID"]
-    }
+    headers = __headers
 
     response = requests.get("https://api.twitch.tv/helix/streams", params=params, headers=headers)
     return {entry["user_login"]: entry for entry in response.json()["data"]}
 
 
 def get_profile_pictures(userid):
-    headers = {
-        "Authorization": f"Bearer {os.environ['ACCESS_TOKEN']}",
-        "Client-Id": os.environ["CLIENT_ID"]
-    }
+    headers = __headers
     response = requests.get(f"https://api.twitch.tv/helix/users?id={userid}", headers=headers)
     return response.json()["data"][0]["profile_image_url"]
 
