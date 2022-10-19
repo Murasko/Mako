@@ -5,7 +5,6 @@ import os
 from dotenv import load_dotenv
 
 import discord
-import wavelink
 from discord.ext import tasks
 
 load_dotenv()
