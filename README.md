@@ -5,7 +5,7 @@ Discord Bot written in Python, using [pycord](https://github.com/Pycord-Developm
 Setup your working Directory with the following Commands
 ```
 python -m venv venv
-source venv/bin/activate
+.\venv\Scripts\activate 
 python -m pip install -r requirements.txt
 ```
 

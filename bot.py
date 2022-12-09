@@ -1,37 +1,36 @@
-from src.twitch import get_notifications, get_profile_pictures
-
+import asyncio
+import json
 import logging
 import os
-from dotenv import load_dotenv
 
 import discord
-from discord.ext import tasks
+from dotenv import load_dotenv
 
 load_dotenv()
-token = os.environ["TOKEN"]
+
+with open("config.json") as config_file:
+    config = json.load(config_file)
 
 logger = logging.getLogger("discord")
 logger.setLevel(logging.INFO)
-handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+handler = logging.FileHandler(
+    filename="discord.log",
+    encoding="utf-8",
+    mode="w")
+
 handler.setFormatter(
     logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
 )
 logger.addHandler(handler)
 
-cogs_list = [
-    'greetings',
-    'utils',
-    'music'
-]
-
 intents = discord.Intents.all()
 
-mako = discord.Bot(intents=intents)
+bot = discord.Bot(intents=intents)
 
 
 async def change_status():
     try:
-        await mako.change_presence(
+        await bot.change_presence(
             activity=discord.Activity(
                 type=discord.ActivityType.watching,
                 name="über euch alle",
@@ -43,39 +42,23 @@ async def change_status():
         print(e)
 
 
-@tasks.loop(minutes=5)
-async def check_twitch_online():
-    try:
-        channel = mako.get_channel(int(os.getenv("NOTIFY_CHANNEL")))
-        if not channel:
-            return
-
-        notifications = get_notifications()
-        for notification in notifications:
-            embed = discord.Embed(
-                title="{} ist Live".format(notification["user_name"]),
-                colour=discord.Colour.random(),
-            )
-            embed.set_author(name="Mako")
-            embed.set_thumbnail(url=get_profile_pictures(notification["user_id"]))
-            embed.add_field(name="Titel: ", value=notification["title"])
-            embed.add_field(name="Spielt: ", value=notification["game_name"])
-
-            await channel.send(embed=embed)
-    except Exception as e:
-        print(e)
+async def load_cogs():
+    for file in os.listdir("./src/cogs"):
+        if file.endswith(".py"):
+            extension = file[:-3]
+            try:
+                bot.load_extension(f"src.cogs.{extension}")
+                print(f"Loaded Extension {extension}")
+            except Exception as e:
+                exception = f"{type(e).__name__}: {e}"
+                print(f"Failed to load extension {extension}\n{exception}")
 
 
-@mako.event
+@bot.event
 async def on_ready():
-    print(f"Logged in as {mako.user}")
+    print(f"Logged in as {bot.user}")
     await change_status()
-    await check_twitch_online.start()
-
 
 if __name__ == "__main__":
-    for cog in cogs_list:
-        mako.load_extension(f"src.cogs.{cog}")
-        print(f"Loaded Cog {cog}")
-
-    mako.run(token)
+    asyncio.run(load_cogs())
+    bot.run(config["token"])

@@ -1,25 +1,26 @@
-import os
 import requests
 import json
 from datetime import datetime
 
 from dotenv import load_dotenv
 
-with open("config.json") as cfile:
-    config = json.load(cfile)
+with open("config.json") as config_file:
+    config = json.load(config_file)
 
 load_dotenv()
 
-__headers = {
-    "Authorization": f"Bearer {os.environ['ACCESS_TOKEN']}",
-    "Client-Id": os.environ["CLIENT_ID"]
+headers = {
+    "Authorization": f"Bearer {config['twitch_access_token']}",
+    "Client-Id": config["twitch_client_id"]
 }
+
+online_users = {}
 
 
 def get_app_access_token():
     params = {
-        "client_id": os.environ["CLIENT_ID"],
-        "client_secret": os.environ["CLIENT_SECRET"],
+        "client_id": config["twitch_client_id"],
+        "client_secret": config["twitch_client_secret"],
         "grant_type": "client_credentials"
     }
 
@@ -28,39 +29,23 @@ def get_app_access_token():
     return access_token
 
 
-def get_users(login_names):
-    params = {
-        "login": login_names
-    }
-
-    headers = __headers
-
-    response = requests.get("https://api.twitch.tv/helix/users", params=params, headers=headers)
-    return {entry["login"]: entry["id"] for entry in response.json()["data"]}
-
-
 def get_streams(users):
     params = {
-        "user_id": users.values()
+        "user_id": users,
+        "type": "live"
     }
-
-    headers = __headers
 
     response = requests.get("https://api.twitch.tv/helix/streams", params=params, headers=headers)
     return {entry["user_login"]: entry for entry in response.json()["data"]}
 
 
-def get_profile_pictures(userid):
-    headers = __headers
-    response = requests.get(f"https://api.twitch.tv/helix/users?id={userid}", headers=headers)
+def get_profile_picture(login_name):
+    response = requests.get(f"https://api.twitch.tv/helix/users?id={login_name}", headers=headers)
     return response.json()["data"][0]["profile_image_url"]
 
 
-online_users = {}
-
-
 def get_notifications():
-    users = get_users(config["watchlist"])
+    users = config["watchlist"]
     streams = get_streams(users)
 
     notifications = []
