@@ -30,3 +30,5 @@ Create config.json and input the Streamers you want to get notified when live:
     ]
 }
 ```
+
+Used Code Snippets and Inspiration from this [Template](https://github.com/kkrypt0nn/Python-Discord-Bot-Template)
