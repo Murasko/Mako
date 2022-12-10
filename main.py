@@ -4,9 +4,6 @@ import logging
 import os
 
 import discord
-from dotenv import load_dotenv
-
-load_dotenv()
 
 with open("config.json") as config_file:
     config = json.load(config_file)
@@ -61,4 +58,4 @@ async def on_ready():
 
 if __name__ == "__main__":
     asyncio.run(load_cogs())
-    bot.run(config["token"])
+    bot.run(config["discord_token"])

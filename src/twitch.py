@@ -2,12 +2,8 @@ import requests
 import json
 from datetime import datetime
 
-from dotenv import load_dotenv
-
 with open("config.json") as config_file:
     config = json.load(config_file)
-
-load_dotenv()
 
 headers = {
     "Authorization": f"Bearer {config['twitch_access_token']}",
