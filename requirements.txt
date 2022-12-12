@@ -1,2 +1,4 @@
 py-cord==2.3.2
 requests==2.28.1
+aiosqlite==0.17.0
+twitchAPI==3.1.1

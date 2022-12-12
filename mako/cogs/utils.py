@@ -7,11 +7,11 @@ class Utils(commands.Cog):
         self.bot = bot
 
     @discord.slash_command()
-    async def ping(self, ctx):
+    async def ping(self, ctx) -> None:
         await ctx.respond(f"Pong! {round(self.latency * 1000)}ms.")
 
     @discord.slash_command()
-    async def userinfo(self, ctx, member: discord.Member = None):
+    async def userinfo(self, ctx, member: discord.Member = None) -> None:
         if member is None:
             member = ctx.author
 
@@ -27,7 +27,9 @@ class Utils(commands.Cog):
             title=f"Userinformation für {member}", colour=discord.Colour.random()
         )
         embed.set_thumbnail(url=pfp)
-        embed.add_field(name="Joined Server: ", value=member.joined_at.strftime("%d/%m/%Y"))
+        embed.add_field(
+            name="Joined Server: ", value=member.joined_at.strftime("%d/%m/%Y")
+        )
         embed.add_field(
             name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y")
         )
