@@ -1,5 +1,3 @@
-import asyncio
-
 import discord
 from discord.ext import commands
 from twitchAPI.twitch import Twitch
@@ -14,7 +12,7 @@ class TwitchNotification(commands.Cog):
         notification_channel = self.bot.get_channel(
             int(self.bot.config["notification_channel"])
         )
-        twitch = Twitch(
+        twitch = await Twitch(
             self.bot.config["twitch_client_id"], self.bot.config["twitch_client_secret"]
         )
         streams = twitch.get_streams(user_login=self.bot.config["watchlist"])
@@ -33,8 +31,8 @@ class TwitchNotification(commands.Cog):
 
     @commands.slash_command()
     async def trigger_notifications(self, ctx) -> None:
+        await ctx.respond("Notification sent!")
         await self.send_notification_when_live()
-        await ctx.respond("Noti")
 
 
 def setup(bot):
