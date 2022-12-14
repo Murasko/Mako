@@ -41,7 +41,7 @@ async def init_database() -> None:
 async def on_ready() -> None:
     print()
     print(f"Logged in as {bot.user}")
-    print(f"discord.py API version: {discord.__version__}")
+    print(f"py-cord API version: {discord.__version__}")
     print(f"Python version: {platform.python_version()}")
     print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
     await change_discord_status()

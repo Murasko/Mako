@@ -4,3 +4,8 @@ CREATE TABLE IF NOT EXISTS `guild_config` (
     `administrators` INT NOT NULL,
     `watchlist` VARCHAR
 );
+
+CREATE TABLE IF NOT EXISTS `twitch_notifications` (
+    `username` VARCHAR NOT NULL,
+    `profile_picture_url` VARCHAR NOT NULL
+)
