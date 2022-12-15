@@ -16,7 +16,6 @@ Create config.json and input the Streamers you want to get notified when live:
     "notification_channel": "",
     "twitch_client_id": "",
     "twitch_client_secret": "",
-    "twitch_access_token": "",
     "watchlist": [
         ""
     ]
