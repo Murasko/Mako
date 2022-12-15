@@ -44,7 +44,10 @@ async def on_ready() -> None:
     print(f"py-cord API version: {discord.__version__}")
     print(f"Python version: {platform.python_version()}")
     print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
+    print()
     await change_discord_status()
+    print()
+    load_cogs()
     print()
 
 
@@ -59,7 +62,7 @@ async def change_discord_status() -> None:
     print("Status set!")
 
 
-async def load_cogs() -> None:
+def load_cogs() -> None:
     for file in os.listdir("mako/cogs"):
         if file.endswith(".py"):
             extension = file[:-3]
@@ -73,5 +76,4 @@ async def load_cogs() -> None:
 
 if __name__ == "__main__":
     asyncio.run(init_database())
-    asyncio.run(load_cogs())
     bot.run(config["discord_token"])

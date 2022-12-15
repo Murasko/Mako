@@ -9,9 +9,8 @@ class TwitchNotification(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.notification_sent = []
-        self.send_notification_when_live.start()
         self.save_user_profile_pictures.start()
-        self.printer.start()
+        self.send_notification_when_live.start()
 
     @tasks.loop(hours=12)
     async def save_user_profile_pictures(self) -> None:
@@ -50,7 +49,7 @@ class TwitchNotification(commands.Cog):
                 embed = discord.Embed(
                     title=f"{stream.user_login} ist Live",
                     colour=discord.Colour.random(),
-                    url=f"https://www.twitch.tv/{stream.user_login}"
+                    url=f"https://www.twitch.tv/{stream.user_login}",
                 )
                 embed.set_author(name="Mako")
                 embed.set_thumbnail(url=profile_image_url[1])
@@ -62,19 +61,6 @@ class TwitchNotification(commands.Cog):
 
             elif stream.type != "live" and stream.user_login in self.notification_sent:
                 self.notification_sent.pop(stream.user_login)
-
-
-    @tasks.loop(seconds=5.0)
-    async def printer(self):
-        print(self.index)
-        self.index += 1
-
-
-    @commands.slash_command()
-    async def trigger_notifications(self, ctx) -> None:
-        await ctx.respond("Triggered live notifications!")
-        await self.save_user_profile_pictures()
-        await self.send_notification_when_live()
 
 
 def setup(bot):
