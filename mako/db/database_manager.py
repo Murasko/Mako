@@ -19,8 +19,7 @@ async def get_saved_profile_images(username: str) -> list:
         async with database.execute(
             "SELECT * FROM twitch_notifications WHERE username=?", (username,)
         ) as cursor:
-            result = await cursor.fetchone()
-            return result
+            return await cursor.fetchone()
 
 
 async def get_notification_channel(guild_id: int) -> int:
