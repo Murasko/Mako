@@ -29,7 +29,7 @@ class TwitchNotification(commands.Cog):
                     user.login, profile_image_url
                 )
 
-    @tasks.loop(minutes=0.5)
+    @tasks.loop(minutes=5)
     async def send_notification_when_live(self) -> None:
         currently_live = []
         notification_channel = self.bot.get_channel(
