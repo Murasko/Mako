@@ -28,7 +28,7 @@ class TwitchNotification(commands.Cog):
                     user.login, profile_image_url
                 )
 
-    @tasks.loop(minutes=0.2)
+    @tasks.loop(minutes=5)
     async def send_notification_when_live(self) -> None:
         currently_live = []
         notification_channel = self.bot.get_channel(
@@ -63,10 +63,6 @@ class TwitchNotification(commands.Cog):
                 is_live = False
             if user in self.notification_sent and not is_live:
                 self.notification_sent.remove(user)
-
-    @send_notification_when_live.before_loop
-    async def before_send_notification_when_live(self):
-        await self.save_user_profile_pictures.start()
 
 
 def setup(bot):
