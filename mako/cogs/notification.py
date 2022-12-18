@@ -9,7 +9,6 @@ class TwitchNotification(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.notification_sent = []
-        self.save_user_profile_pictures.start()
         self.send_notification_when_live.start()
 
     @tasks.loop(hours=12)
@@ -29,7 +28,7 @@ class TwitchNotification(commands.Cog):
                     user.login, profile_image_url
                 )
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes=0.2)
     async def send_notification_when_live(self) -> None:
         currently_live = []
         notification_channel = self.bot.get_channel(
@@ -41,9 +40,7 @@ class TwitchNotification(commands.Cog):
         streams = twitch.get_streams(user_login=self.bot.config["watchlist"])
         async for stream in streams:
             currently_live.append(stream.user_login)
-            if (
-                    stream.user_login not in self.notification_sent
-            ):
+            if stream.user_login not in self.notification_sent:
                 profile_image_url = await database_manager.get_saved_profile_images(
                     stream.user_login
                 )
@@ -66,6 +63,10 @@ class TwitchNotification(commands.Cog):
                 is_live = False
             if user in self.notification_sent and not is_live:
                 self.notification_sent.remove(user)
+
+    @send_notification_when_live.before_loop
+    async def before_send_notification_when_live(self):
+        await self.save_user_profile_pictures.start()
 
 
 def setup(bot):
