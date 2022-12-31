@@ -128,3 +128,4 @@ dmypy.json
 config.json
 database.sqlite
 tox.ini
+mako/db/database.db

@@ -51,7 +51,7 @@ bot.config = config
 
 
 async def init_database() -> None:
-    async with aiosqlite.connect("mako/db/database.sqlite") as database:
+    async with aiosqlite.connect("mako/db/database.db") as database:
         with open("mako/db/schema.sql") as database_schema:
             await database.executescript(database_schema.read())
         await database.commit()
@@ -67,6 +67,10 @@ async def on_ready() -> None:
     print()
     await change_discord_status()
     print()
+    async for guild in bot.fetch_guilds(limit=None):
+        print(guild.id)
+        print(guild.channels)
+        print(guild.owner)
 
 
 async def change_discord_status() -> None:
