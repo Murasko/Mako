@@ -1,5 +1,5 @@
-#  Mako - Multipurpose python bot
-#  Copyright (c) 2022. Marco Murawski
+#  Mako - Python Discord Bot
+#  Copyright (c) 2023. Marco Murawski
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 #
 #  Contact:
 #  info@murasko.de
-#
+
 
 import aiosqlite
 
