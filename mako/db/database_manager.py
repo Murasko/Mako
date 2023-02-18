@@ -20,7 +20,7 @@
 
 import aiosqlite
 
-database_path = "mako/db/database.sqlite"
+database_path = "mako/db/database.db"
 
 
 async def save_twitch_user_profile_picture(

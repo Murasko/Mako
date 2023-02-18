@@ -51,7 +51,7 @@ bot.config = config
 
 
 async def init_database() -> None:
-    async with aiosqlite.connect("mako/db/database.sqlite") as database:
+    async with aiosqlite.connect("mako/db/database.db") as database:
         with open("mako/db/schema.sql") as database_schema:
             await database.executescript(database_schema.read())
         await database.commit()
