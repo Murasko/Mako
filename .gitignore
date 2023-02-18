@@ -126,5 +126,6 @@ dmypy.json
 
 # locals
 config.json
-database.db
+database.sqlite
 tox.ini
+mako/db/database.db
