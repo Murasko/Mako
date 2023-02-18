@@ -24,7 +24,7 @@ database_path = "mako/db/database.db"
 
 
 async def save_twitch_user_profile_picture(
-    username: str, profile_picture_url: str
+        username: str, profile_picture_url: str
 ) -> None:
     async with aiosqlite.connect(database_path) as database:
         await database.execute(
@@ -37,9 +37,15 @@ async def save_twitch_user_profile_picture(
 async def get_saved_profile_images(username: str) -> list:
     async with aiosqlite.connect(database_path) as database:
         async with database.execute(
-            "SELECT * FROM twitch_notifications WHERE username=?", (username,)
+                "SELECT * FROM twitch_notifications WHERE username=?", (username,)
         ) as cursor:
             return await cursor.fetchone()
+
+
+async def set_guild_id(guild_id: int) -> None:
+    async with aiosqlite.connect(database_path) as database:
+        await database.execute(f"INSERT INTO guild_config VALUES {guild_id}")
+        await database.commit()
 
 
 async def get_notification_channel(guild_id: int) -> int:

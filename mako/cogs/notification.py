@@ -18,11 +18,11 @@
 #  info@murasko.de
 
 
-from mako.db import database_manager
-
 import discord
 from discord.ext import commands, tasks
 from twitchAPI.twitch import Twitch
+
+from mako.db import database_manager
 
 
 class TwitchNotification(commands.Cog):

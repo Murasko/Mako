@@ -17,7 +17,6 @@
 #  Contact:
 #  info@murasko.de
 
-
 import discord
 from discord.ext import commands
 

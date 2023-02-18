@@ -67,6 +67,10 @@ async def on_ready() -> None:
     print()
     await change_discord_status()
     print()
+    async for guild in bot.fetch_guilds(limit=None):
+        print(guild.id)
+        print(guild.channels)
+        print(guild.owner)
 
 
 async def change_discord_status() -> None:

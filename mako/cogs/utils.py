@@ -30,8 +30,8 @@ class Utils(commands.Cog):
     async def ping(self, ctx) -> None:
         await ctx.respond(f"Pong! {round(self.bot.latency * 1000)}ms.")
 
-    @discord.slash_command()
-    async def userinfo(self, ctx, member: discord.Member = None) -> None:
+    @discord.slash_command(guild_ony=True)
+    async def userinfo(self, ctx, member: discord.Member = None, ) -> None:
         if member is None:
             member = ctx.author
 
