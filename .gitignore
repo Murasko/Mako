@@ -126,5 +126,5 @@ dmypy.json
 
 # locals
 config.json
-database.sqlite
+database.db
 tox.ini
