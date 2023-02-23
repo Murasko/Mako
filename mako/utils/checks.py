@@ -17,27 +17,15 @@
 #  Contact:
 #  info@murasko.de
 
-import discord
 from discord.ext import commands
 
-
-class Greetings(commands.Cog, name="greetings"):
-    def __init__(self, bot):
-        self.bot = bot
-
-    @discord.slash_command()
-    async def reload_greetings(self, ctx):
-        self.bot.reload_extension('mako.cogs.greetings')
-        await ctx.respond('Reloaded Greetings.')
-
-    @commands.Cog.listener()
-    async def on_member_join(self, member: discord.Member) -> None:
-        await member.guild.system_channel.send(f"Hi {member.mention}, viel Spaß hier!")
-
-    @commands.Cog.listener()
-    async def on_member_leave(self, member: discord.Member) -> None:
-        await member.guild.system_channel.send(f"{member.mention} verlässt uns leider.")
+from mako.db import database_manager
 
 
-def setup(bot):
-    bot.add_cog(Greetings(bot))
+def is_admin():
+    async def predicate(ctx):
+        if str(ctx.author) in await database_manager.get_guild_administrator(ctx.guild.id):
+            return True
+        else:
+            await ctx.respond('Du besitzt nicht die notwendigen Berechtigungen um diesen Command zu benutzen!')
+    return commands.check(predicate)

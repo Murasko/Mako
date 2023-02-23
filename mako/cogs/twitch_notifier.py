@@ -17,6 +17,7 @@
 #  Contact:
 #  info@murasko.de
 #
+import time
 
 import discord
 from discord.ext import commands, tasks
@@ -32,22 +33,22 @@ class TwitchNotification(commands.Cog):
         self.notification_sent = []
         self.send_notification_when_live.start()
 
+    @discord.slash_command()
+    async def reload_twitch_notifier(self, ctx):
+        self.bot.reload_extension('mako.cogs.twitch_notifier')
+        await ctx.respond('Reloaded Twitch Notifier.')
+
     @tasks.loop(hours=48)
     async def save_user_profile_pictures(self) -> None:
-        twitch = await Twitch(
-            self.bot.config["twitch_client_id"], self.bot.config["twitch_client_secret"]
-        )
+        twitch = await Twitch(self.bot.config["twitch_client_id"], self.bot.config["twitch_client_secret"])
         users = twitch.get_users(logins=self.bot.config["watchlist"])
 
         async for user in users:
             profile_image_url = user.profile_image_url
-            profile_image_list = await database_manager.get_saved_profile_images(
-                user.login
-            )
+            print(user.login, profile_image_url)
+            profile_image_list = await database_manager.get_saved_profile_images(user.login)
             if profile_image_list is None:
-                await database_manager.save_twitch_user_profile_picture(
-                    user.login, profile_image_url
-                )
+                await database_manager.save_twitch_user_profile_picture(user.login, profile_image_url)
 
     @tasks.loop(minutes=5)
     async def send_notification_when_live(self) -> None:

@@ -28,6 +28,8 @@ import sys
 import aiosqlite
 import discord
 
+from mako.db import database_manager
+
 if not os.path.isfile("config.json"):
     sys.exit("Couldn't find 'config.json'! Please make sure you've added it.")
 else:
@@ -38,9 +40,7 @@ logger = logging.getLogger("discord")
 logger.setLevel(logging.INFO)
 handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 
-handler.setFormatter(
-    logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
-)
+handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
 logger.addHandler(handler)
 
 intents = discord.Intents.all()
@@ -57,33 +57,6 @@ async def init_database() -> None:
         await database.commit()
 
 
-@bot.event
-async def on_ready() -> None:
-    print()
-    print(f"Logged in as {bot.user}")
-    print(f"py-cord API version: {discord.__version__}")
-    print(f"Python version: {platform.python_version()}")
-    print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
-    print()
-    await change_discord_status()
-    print()
-    async for guild in bot.fetch_guilds(limit=None):
-        print(guild.id)
-        print(guild.channels)
-        print(guild.owner)
-
-
-async def change_discord_status() -> None:
-    await bot.change_presence(
-        activity=discord.Activity(
-            type=discord.ActivityType.watching,
-            name="über euch alle",
-            state=discord.Status.online,
-        )
-    )
-    print("Status set!")
-
-
 def load_cogs() -> None:
     for file in os.listdir("mako/cogs"):
         if file.endswith(".py"):
@@ -97,6 +70,39 @@ def load_cogs() -> None:
 
 
 load_cogs()
+
+
+@bot.event
+async def on_ready() -> None:
+    print(f"Logged in as {bot.user}")
+    print(f"py-cord API version: {discord.__version__}")
+    print(f"Python version: {platform.python_version()}")
+    print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
+    print()
+    await change_discord_status()
+    print()
+    await add_owner_as_admin()
+
+
+async def change_discord_status() -> None:
+    await bot.change_presence(
+        activity=discord.Activity(
+            type=discord.ActivityType.watching,
+            name="über diesen Server",
+            state=discord.Status.online,
+        )
+    )
+    print("Status set!")
+
+
+async def add_owner_as_admin() -> None:
+    for guild in bot.guilds:
+        admins = await database_manager.get_guild_administrator(guild.id)
+        if not admins:
+            await database_manager.set_guild_administrator(guild.id, str(guild.owner))
+        elif str(guild.owner) not in admins:
+            await database_manager.set_guild_administrator(guild.id, str(guild.owner))
+
 
 if __name__ == "__main__":
     asyncio.run(init_database())

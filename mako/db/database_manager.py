@@ -28,32 +28,70 @@ async def save_twitch_user_profile_picture(
 ) -> None:
     async with aiosqlite.connect(database_path) as database:
         await database.execute(
-            "INSERT INTO twitch_notifications VALUES (?, ?)",
-            (username, profile_picture_url),
+            f"INSERT INTO twitch_notifications VALUES (?, ?)",
+            (username, profile_picture_url,)
         )
         await database.commit()
 
 
-async def get_saved_profile_images(username: str) -> list:
+async def get_saved_profile_images(username: str) -> tuple:
     async with aiosqlite.connect(database_path) as database:
         async with database.execute(
-                "SELECT * FROM twitch_notifications WHERE username=?", (username,)
+                f"SELECT * FROM twitch_notifications WHERE username=?",
+                (username,)
         ) as cursor:
-            return await cursor.fetchone()
+            result = await cursor.fetchone()
+            return result
 
 
-async def set_guild_id(guild_id: int) -> None:
+async def set_notification_channel(guild_id: int, notification_channel: int) -> str:
     async with aiosqlite.connect(database_path) as database:
-        await database.execute(f"INSERT INTO guild_config VALUES {guild_id}")
+        await database.execute(
+            f"INSERT INTO guild_notification_channel (guild_id, notification_channel) VALUES (?, ?)",
+        (guild_id, notification_channel,))
         await database.commit()
+        return f"Set Channel with ID {notification_channel} as Notification Channel."
 
 
 async def get_notification_channel(guild_id: int) -> int:
-    pass
+    async with aiosqlite.connect(database_path) as database:
+        async with database.execute(
+                f"SELECT * FROM guild_notification_channel WHERE guild_id=?",
+                (guild_id,)
+        ) as cursor:
+            result = await cursor.fetchone()
+            return result
 
 
-async def set_notification_channel(guild_id: int, notification_channel: int) -> None:
-    pass
+async def set_guild_administrator(guild_id: int, user_id: str) -> str:
+    async with aiosqlite.connect(database_path) as database:
+        await database.execute(f"INSERT INTO guild_admins (guild_id, user_id) VALUES (?, ?)",
+                               (guild_id, user_id,))
+        await database.commit()
+        return f"Added {user_id} as admin."
+
+
+async def get_guild_administrator(guild_id: int) -> list:
+    async with aiosqlite.connect(database_path) as database:
+        async with database.execute(
+                f"SELECT user_id FROM guild_admins WHERE guild_id=?",
+                (guild_id,)
+        ) as cursor:
+            result = await cursor.fetchall()
+            administrators = []
+            for admin in result:
+                administrators.append(admin[0])
+            return administrators
+
+
+async def remove_guild_administrator(guild_id: int, username: str) -> str:
+    async with aiosqlite.connect(database_path) as database:
+        await database.execute(
+            f"DELETE FROM guild_admins where guild_id=? AND user_id=?",
+            (guild_id, username,)
+        )
+        await database.commit()
+        return f"Removed {username} from Administrators for this Guild."
 
 
 async def get_watchlist(guild_id: int) -> list:
@@ -61,4 +99,8 @@ async def get_watchlist(guild_id: int) -> list:
 
 
 async def set_watchlist(guild_id: int, watchlist: list) -> None:
+    pass
+
+
+async def remove_watchlist(guild_id: int, watchlist: list) -> str:
     pass

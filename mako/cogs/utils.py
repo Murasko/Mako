@@ -21,10 +21,18 @@
 import discord
 from discord.ext import commands
 
+from mako.db import database_manager
+from mako.utils.checks import is_admin
+
 
 class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @discord.slash_command()
+    async def reload_utils(self, ctx):
+        self.bot.reload_extension('mako.cogs.utils')
+        await ctx.respond('Reloaded Utils.')
 
     @discord.slash_command()
     async def ping(self, ctx) -> None:
@@ -56,6 +64,23 @@ class Utils(commands.Cog):
         embed.add_field(name="Roles: ", value=str(roles), inline=False)
 
         await ctx.respond(embed=embed)
+
+    @discord.slash_command(guild_only=True, guild_ids=[656899959035133972, 1054741800671252532])
+    @is_admin()
+    async def add_administrator(self, ctx, username: str) -> None:
+        await ctx.respond(await database_manager.set_guild_administrator(ctx.guild.id, username))
+
+    @discord.slash_command(guild_only=True, guild_ids=[656899959035133972, 1054741800671252532])
+    @is_admin()
+    async def get_administrator(self, ctx) -> None:
+        guild_admins = await database_manager.get_guild_administrator(ctx.guild.id)
+        await ctx.respond(f"The following Users are administrators on {ctx.guild}: {guild_admins}")
+
+    @discord.slash_command(guild_only=True, guild_ids=[656899959035133972, 1054741800671252532])
+    @is_admin()
+    async def remove_administrator(self, ctx, username: str) -> None:
+        await database_manager.remove_guild_administrator(ctx.guild.id, username)
+        await ctx.respond(f"The following User is no more an administrator of {ctx.guild}'s {self.bot.name} Bot: {username}")
 
 
 def setup(bot):
