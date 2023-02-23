@@ -80,7 +80,7 @@ class Utils(commands.Cog):
     @is_admin()
     async def remove_administrator(self, ctx, username: str) -> None:
         await database_manager.remove_guild_administrator(ctx.guild.id, username)
-        await ctx.respond(f"The following User is no more an administrator of {ctx.guild}'s {self.bot.name} Bot: {username}")
+        await ctx.respond(f"The following User is no more an administrator of {ctx.guild}: {username}")
 
 
 def setup(bot):

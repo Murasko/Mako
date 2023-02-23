@@ -48,7 +48,7 @@ async def set_notification_channel(guild_id: int, notification_channel: int) -> 
     async with aiosqlite.connect(database_path) as database:
         await database.execute(
             f"INSERT INTO guild_notification_channel (guild_id, notification_channel) VALUES (?, ?)",
-        (guild_id, notification_channel,))
+            (guild_id, notification_channel,))
         await database.commit()
         return f"Set Channel with ID {notification_channel} as Notification Channel."
 
@@ -56,11 +56,11 @@ async def set_notification_channel(guild_id: int, notification_channel: int) -> 
 async def get_notification_channel(guild_id: int) -> int:
     async with aiosqlite.connect(database_path) as database:
         async with database.execute(
-                f"SELECT * FROM guild_notification_channel WHERE guild_id=?",
+                f"SELECT notification_channel FROM guild_notification_channel WHERE guild_id=?",
                 (guild_id,)
         ) as cursor:
             result = await cursor.fetchone()
-            return result
+            return result[0]
 
 
 async def set_guild_administrator(guild_id: int, user_id: str) -> str:
@@ -95,12 +95,31 @@ async def remove_guild_administrator(guild_id: int, username: str) -> str:
 
 
 async def get_watchlist(guild_id: int) -> list:
-    pass
+    async with aiosqlite.connect(database_path) as database:
+        async with database.execute(
+                f"SELECT username FROM twitch_watchlist WHERE guild_id=?",
+                (guild_id,)
+        ) as cursor:
+            result = await cursor.fetchall()
+            watchlist = []
+            for user in result:
+                watchlist.append(user[0])
+            return watchlist
 
 
-async def set_watchlist(guild_id: int, watchlist: list) -> None:
-    pass
+async def set_watchlist(guild_id: int, username: str) -> str:
+    async with aiosqlite.connect(database_path) as database:
+        await database.execute(f"INSERT INTO twitch_watchlist (guild_id, username) VALUES (?, ?)",
+                               (guild_id, username,))
+        await database.commit()
+        return f"Added {username} to Watchlist."
 
 
-async def remove_watchlist(guild_id: int, watchlist: list) -> str:
-    pass
+async def remove_watchlist(guild_id: int, username: str) -> str:
+    async with aiosqlite.connect(database_path) as database:
+        await database.execute(
+            f"DELETE FROM twitch_watchlist where guild_id=? AND username=?",
+            (guild_id, username,)
+        )
+        await database.commit()
+        return f"Removed {username} from Watchlist for this Guild."
