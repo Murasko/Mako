@@ -23,31 +23,29 @@ import aiosqlite
 database_path = "mako/db/database.db"
 
 
-async def save_twitch_user_profile_picture(
-        username: str, profile_picture_url: str
-) -> None:
+async def save_twitch_user_profile_picture(username: str, profile_picture_url: str) -> None:
     async with aiosqlite.connect(database_path) as database:
         await database.execute(
-            f"INSERT INTO twitch_notifications VALUES (?, ?)",
+            "INSERT INTO twitch_notifications VALUES (?, ?)",
             (username, profile_picture_url,)
         )
         await database.commit()
 
 
-async def get_saved_profile_images(username: str) -> tuple:
+async def get_saved_profile_images(username: str) -> str:
     async with aiosqlite.connect(database_path) as database:
         async with database.execute(
-                f"SELECT * FROM twitch_notifications WHERE username=?",
+                "SELECT profile_picture_url FROM twitch_notifications WHERE username=?",
                 (username,)
         ) as cursor:
             result = await cursor.fetchone()
-            return result
+            return result[0]
 
 
 async def set_notification_channel(guild_id: int, notification_channel: int) -> str:
     async with aiosqlite.connect(database_path) as database:
         await database.execute(
-            f"INSERT INTO guild_notification_channel (guild_id, notification_channel) VALUES (?, ?)",
+            "INSERT INTO guild_notification_channel (guild_id, notification_channel) VALUES (?, ?)",
             (guild_id, notification_channel,))
         await database.commit()
         return f"Set Channel with ID {notification_channel} as Notification Channel."
@@ -56,17 +54,21 @@ async def set_notification_channel(guild_id: int, notification_channel: int) -> 
 async def get_notification_channel(guild_id: int) -> int:
     async with aiosqlite.connect(database_path) as database:
         async with database.execute(
-                f"SELECT notification_channel FROM guild_notification_channel WHERE guild_id=?",
+                "SELECT notification_channel FROM guild_notification_channel WHERE guild_id=?",
                 (guild_id,)
         ) as cursor:
             result = await cursor.fetchone()
-            return result[0]
+            if not result:
+                return 0
+            else:
+                return result[0]
 
 
 async def set_guild_administrator(guild_id: int, user_id: str) -> str:
     async with aiosqlite.connect(database_path) as database:
-        await database.execute(f"INSERT INTO guild_admins (guild_id, user_id) VALUES (?, ?)",
-                               (guild_id, user_id,))
+        await database.execute(
+            "INSERT INTO guild_admins (guild_id, user_id) VALUES (?, ?)",
+            (guild_id, user_id,))
         await database.commit()
         return f"Added {user_id} as admin."
 
@@ -74,7 +76,7 @@ async def set_guild_administrator(guild_id: int, user_id: str) -> str:
 async def get_guild_administrator(guild_id: int) -> list:
     async with aiosqlite.connect(database_path) as database:
         async with database.execute(
-                f"SELECT user_id FROM guild_admins WHERE guild_id=?",
+                "SELECT user_id FROM guild_admins WHERE guild_id=?",
                 (guild_id,)
         ) as cursor:
             result = await cursor.fetchall()
@@ -87,7 +89,7 @@ async def get_guild_administrator(guild_id: int) -> list:
 async def remove_guild_administrator(guild_id: int, username: str) -> str:
     async with aiosqlite.connect(database_path) as database:
         await database.execute(
-            f"DELETE FROM guild_admins where guild_id=? AND user_id=?",
+            "DELETE FROM guild_admins where guild_id=? AND user_id=?",
             (guild_id, username,)
         )
         await database.commit()
@@ -97,7 +99,7 @@ async def remove_guild_administrator(guild_id: int, username: str) -> str:
 async def get_watchlist(guild_id: int) -> list:
     async with aiosqlite.connect(database_path) as database:
         async with database.execute(
-                f"SELECT username FROM twitch_watchlist WHERE guild_id=?",
+                "SELECT username FROM twitch_watchlist WHERE guild_id=?",
                 (guild_id,)
         ) as cursor:
             result = await cursor.fetchall()
@@ -109,8 +111,9 @@ async def get_watchlist(guild_id: int) -> list:
 
 async def set_watchlist(guild_id: int, username: str) -> str:
     async with aiosqlite.connect(database_path) as database:
-        await database.execute(f"INSERT INTO twitch_watchlist (guild_id, username) VALUES (?, ?)",
-                               (guild_id, username,))
+        await database.execute(
+            "INSERT INTO twitch_watchlist (guild_id, username) VALUES (?, ?)",
+            (guild_id, username,))
         await database.commit()
         return f"Added {username} to Watchlist."
 
@@ -118,8 +121,30 @@ async def set_watchlist(guild_id: int, username: str) -> str:
 async def remove_watchlist(guild_id: int, username: str) -> str:
     async with aiosqlite.connect(database_path) as database:
         await database.execute(
-            f"DELETE FROM twitch_watchlist where guild_id=? AND username=?",
+            "DELETE FROM twitch_watchlist where guild_id=? AND username=?",
             (guild_id, username,)
         )
         await database.commit()
         return f"Removed {username} from Watchlist for this Guild."
+
+
+async def get_streamer_status(username: str) -> str:
+    async with aiosqlite.connect(database_path) as database:
+        async with database.execute(
+                "SELECT status FROM twitch_notifications WHERE username=?",
+                (username,)
+        ) as cursor:
+            result = await cursor.fetchone()
+            if result:
+                return result[0]
+            else:
+                return "offline"
+
+
+async def update_streamer_status(username: str, status: str) -> None:
+    async with aiosqlite.connect(database_path) as database:
+        await database.execute(
+            "INSERT INTO twitch_notifications (username, status) VALUES (?, ?) ON CONFLICT(username) DO UPDATE SET status = ?",
+            (username, status, status)
+        )
+        await database.commit()

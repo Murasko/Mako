@@ -125,7 +125,6 @@ venv.bak/
 dmypy.json
 
 # locals
-config.json
-database.sqlite
-tox.ini
-mako/db/database.db
+mako/config.json
+db.sqlite3*
+

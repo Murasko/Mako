@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS `twitch_watchlist` (
 );
 
 CREATE TABLE IF NOT EXISTS `twitch_notifications` (
-    `username` VARCHAR NOT NULL,
-    `profile_picture_url` VARCHAR NOT NULL
+    `username` VARCHAR NOT NULL PRIMARY KEY,
+    `profile_picture_url` VARCHAR NOT NULL,
+    `status` VARCHAR NOT NULL
 );

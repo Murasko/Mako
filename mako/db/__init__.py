@@ -16,16 +16,4 @@
 #
 #  Contact:
 #  info@murasko.de
-
-from discord.ext import commands
-
-from mako.db import database_manager
-
-
-def is_admin():
-    async def predicate(ctx):
-        if str(ctx.author) in await database_manager.get_guild_administrator(ctx.guild.id):
-            return True
-        else:
-            await ctx.respond('Du besitzt nicht die notwendigen Berechtigungen um diesen Command zu benutzen!')
-    return commands.check(predicate)
+from .models import Guild, User, TwitchWatchlist, TwitchNotifications
