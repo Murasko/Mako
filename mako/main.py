@@ -42,8 +42,7 @@ import os
 import platform
 import sys
 
-from db import Guild
-from mako.db import database_manager
+from mako.db import User, Guild
 
 if not os.path.isfile("config.json"):
     sys.exit("Couldn't find 'config.json'! Please make sure you've added it.")
@@ -66,11 +65,9 @@ bot.config = config
 
 
 async def init_database() -> None:
-    await Tortoise.init(
-        db_url='sqlite://db/db.sqlite3',
-        modules={'mako': ['db.models']},
-    )
+    await Tortoise.init(db_url='sqlite://db/db.sqlite3', modules={'models': ['db.models']})
     await Tortoise.generate_schemas()
+    print('Initialized Database')
 
 
 def load_cogs() -> None:
@@ -86,16 +83,7 @@ def load_cogs() -> None:
 
 
 # load_cogs()
-async def test():
-    guilds = await Guild.all()
-    for guild in bot.guilds:
-        if guild.id not in guilds:
-            guild_instance = Guild(guild_id=guild.id, notification_channel=guild.system_channel.id, owner=guild.owner.id)
-            await guild_instance.save()
-            print(f'Saved {guild.name} to Database.')
-        else:
-            continue
-    await Tortoise.close_connections()
+bot.load_extension('mako.cogs.orm')
 
 
 @bot.event
@@ -107,10 +95,6 @@ async def on_ready() -> None:
     print()
     await change_discord_status()
     print()
-    await test()
-
-
-#    await add_owner_as_admin()
 
 
 async def change_discord_status() -> None:
@@ -124,15 +108,6 @@ async def change_discord_status() -> None:
     print("Status set!")
 
 
-async def add_owner_as_admin() -> None:
-    for guild in bot.guilds:
-        admins = await database_manager.get_guild_administrator(guild.id)
-        if not admins:
-            await database_manager.set_guild_administrator(guild.id, str(guild.owner))
-        elif str(guild.owner) not in admins:
-            await database_manager.set_guild_administrator(guild.id, str(guild.owner))
-
-
 if __name__ == "__main__":
-    run_async(init_database())
+    bot.loop.create_task(init_database())
     bot.run(config["discord_token"])

@@ -3,22 +3,24 @@ from tortoise import fields
 
 
 class Guild(Model):
-    guild_id = fields.BigIntField(pk=True)
-    notification_channel = fields.BigIntField()
-    owner = fields.ForeignKeyField(model_name='mako.User', related_name='owner_id')
-    admins = fields.ManyToManyField(model_name='mako.User', related_name='admin_id')
-    twitch_watchlist = fields.ManyToManyField(model_name='mako.TwitchWatchlist', related_name='twitch_username')
+    id = fields.BigIntField(pk=True)
+    notification_channel = fields.BigIntField(null=True)
+    owner = fields.ForeignKeyField(model_name='models.User', related_name='owned_guilds')
+    admins = fields.ManyToManyField(model_name='models.User', related_name='administered_guilds')
+    watchlist = fields.ManyToManyField(model_name='models.Watchlist', related_name='watchlist')
 
 
 class User(Model):
-    user_id = fields.BigIntField(pk=True)
+    id = fields.BigIntField(pk=True)
+    owned_guilds: fields.ManyToManyRelation['Guild']
+    administered_guilds: fields.ManyToManyRelation['Guild']
 
 
-class TwitchWatchlist(Model):
-    username = fields.CharField(max_length=50, pk=True)
+class Watchlist(Model):
+    username = fields.CharField(max_length=50)
 
 
-class TwitchNotifications(Model):
-    username = fields.CharField(max_length=100, pk=True)
+class Notifications(Model):
+    username = fields.CharField(pk=True, max_length=50)
     profile_picture_url = fields.CharField(max_length=500)
-    status = fields.CharField(max_length=50, default='offline')
+    status = fields.CharField(max_length=8, default='offline')
