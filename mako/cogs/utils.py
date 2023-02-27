@@ -30,15 +30,19 @@ class Utils(commands.Cog):
 
     @discord.slash_command()
     async def reload_utils(self, ctx):
-        self.bot.reload_extension('mako.cogs.utils')
-        await ctx.respond('Reloaded Utils.')
+        self.bot.reload_extension("mako.cogs.utils")
+        await ctx.respond("Reloaded Utils.")
 
     @discord.slash_command()
     async def ping(self, ctx) -> None:
         await ctx.respond(f"Pong! {round(self.bot.latency * 1000)}ms.")
 
     @discord.slash_command(guild_ony=True)
-    async def userinfo(self, ctx, member: discord.Member = None, ) -> None:
+    async def userinfo(
+        self,
+        ctx,
+        member: discord.Member = None,
+    ) -> None:
         if member is None:
             member = ctx.author
 
@@ -64,22 +68,34 @@ class Utils(commands.Cog):
 
         await ctx.respond(embed=embed)
 
-    @discord.slash_command(guild_only=True, guild_ids=[656899959035133972, 1054741800671252532])
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
     @is_admin()
     async def add_administrator(self, ctx, username: str) -> None:
-        await ctx.respond(await database_manager.set_guild_administrator(ctx.guild.id, username))
+        await ctx.respond(
+            await database_manager.set_guild_administrator(ctx.guild.id, username)
+        )
 
-    @discord.slash_command(guild_only=True, guild_ids=[656899959035133972, 1054741800671252532])
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
     @is_admin()
     async def get_administrator(self, ctx) -> None:
         guild_admins = await database_manager.get_guild_administrator(ctx.guild.id)
-        await ctx.respond(f"The following Users are administrators on {ctx.guild}: {guild_admins}")
+        await ctx.respond(
+            f"The following Users are administrators on {ctx.guild}: {guild_admins}"
+        )
 
-    @discord.slash_command(guild_only=True, guild_ids=[656899959035133972, 1054741800671252532])
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
     @is_admin()
     async def remove_administrator(self, ctx, username: str) -> None:
         await database_manager.remove_guild_administrator(ctx.guild.id, username)
-        await ctx.respond(f"The following User is no more an administrator of {ctx.guild}: {username}")
+        await ctx.respond(
+            f"The following User is no more an administrator of {ctx.guild}: {username}"
+        )
 
 
 def setup(bot):

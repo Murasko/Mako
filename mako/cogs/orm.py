@@ -22,11 +22,18 @@ from discord.ext import commands
 from tortoise import Tortoise
 
 from mako.db import Guild, User
+from mako.utils.checks import is_admin, is_owner
 
 
 class Orm(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @is_owner()
+    @discord.slash_command()
+    async def reload_orm(self, ctx):
+        self.bot.reload_extension("mako.cogs.orm")
+        await ctx.respond("Reloaded Orm.")
 
     async def test(self):
         for current_guild in self.bot.guilds:
@@ -37,31 +44,45 @@ class Orm(commands.Cog):
             if not await Guild.filter(id=current_guild.id).exists():
                 if not await User.filter(id=current_guild.owner.id).exists():
                     owner, _ = await User.get_or_create(id=current_guild.owner.id)
-                    guild, _ = await Guild.get_or_create(id=current_guild.id,
-                                                                notification_channel=notification_channel,
-                                                                owner=owner)
+                    guild, _ = await Guild.get_or_create(
+                        id=current_guild.id,
+                        notification_channel=notification_channel,
+                        owner=owner,
+                    )
                 else:
                     owner, _ = await User.get_or_create(id=current_guild.owner.id)
-                    guild, _ = await Guild.get_or_create(id=current_guild.id,
-                                                                notification_channel=notification_channel,
-                                                                owner=owner)
-                print(f'Saved {guild.id} / {current_guild.name} with owner '
-                      f'{owner.id} / {str(current_guild.owner)} to Database.')
+                    guild, _ = await Guild.get_or_create(
+                        id=current_guild.id,
+                        notification_channel=notification_channel,
+                        owner=owner,
+                    )
+                print(
+                    f"Saved {guild.id} / {current_guild.name} with owner "
+                    f"{owner.id} / {str(current_guild.owner)} to Database."
+                )
             else:
                 continue
         await Tortoise.close_connections()
 
     async def get_guild_owner(self, guild_id):
-        guild, _ = await Guild.get()
+        owner_query = await Guild.filter(id=guild_id).values_list("owner_id")
+        await Tortoise.close_connections()
+        return owner_query[0][0]
 
-    @discord.slash_command(guild_only=True, guild_ids=[656899959035133972, 1054741800671252532])
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
     async def test_commands(self, ctx) -> None:
         await self.test()
-        await ctx.respond('Done')
+        await ctx.respond("Done")
 
-    @discord.slash_command(guild_only=True, guild_ids=[656899959035133972, 1054741800671252532])
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
     async def get_owner(self, ctx) -> None:
-        await ctx.respond()
+        owner_id = await self.get_guild_owner(ctx.guild.id)
+        owner = self.bot.get_user(owner_id)
+        await ctx.respond(f"The owner of this Guild is {owner}.")
 
 
 def setup(bot):

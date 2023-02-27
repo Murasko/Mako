@@ -27,8 +27,8 @@ class Greetings(commands.Cog, name="greetings"):
 
     @discord.slash_command()
     async def reload_greetings(self, ctx):
-        self.bot.reload_extension('mako.cogs.greetings')
-        await ctx.respond('Reloaded Greetings.')
+        self.bot.reload_extension("mako.cogs.greetings")
+        await ctx.respond("Reloaded Greetings.")
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:

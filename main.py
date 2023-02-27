@@ -37,7 +37,9 @@ logger = logging.getLogger("discord")
 logger.setLevel(logging.INFO)
 handler = logging.FileHandler(filename="../discord.log", encoding="utf-8", mode="w")
 
-handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s"))
+handler.setFormatter(
+    logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
+)
 logger.addHandler(handler)
 
 intents = discord.Intents.all()
@@ -48,9 +50,11 @@ bot.config = config
 
 
 async def init_database() -> None:
-    await Tortoise.init(db_url='sqlite://mako/db/db.sqlite3', modules={'models': ['mako.db.models']})
+    await Tortoise.init(
+        db_url="sqlite://mako/db/db.sqlite3", modules={"models": ["mako.db.models"]}
+    )
     await Tortoise.generate_schemas()
-    print('Initialized Database')
+    print("Initialized Database")
 
 
 def load_cogs() -> None:
@@ -66,7 +70,7 @@ def load_cogs() -> None:
 
 
 # load_cogs()
-bot.load_extension('mako.cogs.orm')
+bot.load_extension("mako.cogs.orm")
 
 
 @bot.event

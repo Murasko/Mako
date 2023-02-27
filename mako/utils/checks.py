@@ -18,14 +18,37 @@
 #  info@murasko.de
 
 from discord.ext import commands
+from tortoise import Tortoise
+
 
 from mako.db import User, Guild
 
 
-def is_admin():
+def is_owner():
     async def predicate(ctx):
-        if str(ctx.author.id) in await database_manager.get_guild_administrator(ctx.guild.id):
+        guild_id = ctx.author.guild.id
+        owner_query = await Guild.filter(id=guild_id).values_list("owner_id")
+        await Tortoise.close_connections()
+        owner_id = owner_query[0][0]
+        if ctx.author.id == owner_id:
             return True
         else:
-            await ctx.respond('Du besitzt nicht die notwendigen Berechtigungen um diesen Command zu benutzen!')
+            await ctx.respond("You need to be Guildowner to use this command!")
+
+    return commands.check(predicate)
+
+
+def is_admin():
+    async def predicate(ctx):
+        guild_id = ctx.author.guild.id
+        owner_query = await Guild.filter(id=guild_id).values_list("owner_id")
+        admin_query = await Guild.filter(id=guild_id).values_list
+        await Tortoise.close_connections()
+        if ctx.author.id in owner_query[0] or admin_query[0]:
+            return True
+        else:
+            await ctx.respond(
+                "Du besitzt nicht die notwendigen Berechtigungen um diesen Command zu benutzen!"
+            )
+
     return commands.check(predicate)
