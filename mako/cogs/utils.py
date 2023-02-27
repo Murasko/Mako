@@ -21,7 +21,8 @@
 import discord
 from discord.ext import commands
 
-from mako.utils.checks import is_admin
+from mako.db.models import Guild, User
+from mako.utils.checks import is_admin, is_owner
 
 
 class Utils(commands.Cog):
@@ -71,31 +72,36 @@ class Utils(commands.Cog):
     @discord.slash_command(
         guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
     )
-    @is_admin()
-    async def add_administrator(self, ctx, username: str) -> None:
-        await ctx.respond(
-            await database_manager.set_guild_administrator(ctx.guild.id, username)
-        )
-
-    @discord.slash_command(
-        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    )
-    @is_admin()
     async def get_administrator(self, ctx) -> None:
-        guild_admins = await database_manager.get_guild_administrator(ctx.guild.id)
+        guild = await Guild.get(id=ctx.author.guild.id)
+        admin_ids = [admin.id for admin in await guild.admins.all()]
+        admins = []
+        for id in admin_ids:
+            user = self.bot.get_user(id)
+            admins.append(f"ID: {id} / Name: {user.name}#{user.discriminator}")
+        format_admins = "\n".join(admins)
         await ctx.respond(
-            f"The following Users are administrators on {ctx.guild}: {guild_admins}"
+            f"These Users are currently Admins on this Guild:\n{format_admins}"
         )
 
     @discord.slash_command(
         guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
     )
-    @is_admin()
-    async def remove_administrator(self, ctx, username: str) -> None:
-        await database_manager.remove_guild_administrator(ctx.guild.id, username)
-        await ctx.respond(
-            f"The following User is no more an administrator of {ctx.guild}: {username}"
-        )
+    async def get_owner(self, ctx) -> None:
+        owner_id = await Guild.filter(id=ctx.author.guild.id).values_list("owner_id")
+        owner = self.bot.get_user(owner_id[0][0])
+        await ctx.respond(f"The owner of this Guild is {owner}.")
+
+    @is_owner()
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
+    async def add_administrator(self, ctx, user_id) -> None:
+        guild_id = ctx.author.guild.id
+        guild = await Guild.get(id=guild_id)
+        user, _ = await User.get_or_create(id=user_id)
+        await guild.admins.add(user)
+        await ctx.respond(f"Added {user_id} as Admin.")
 
 
 def setup(bot):

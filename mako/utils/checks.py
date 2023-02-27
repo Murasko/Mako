@@ -33,22 +33,20 @@ def is_owner():
         if ctx.author.id == owner_id:
             return True
         else:
-            await ctx.respond("You need to be Guildowner to use this command!")
+            await ctx.respond("You need to be the Owner to use this command!")
 
     return commands.check(predicate)
 
 
 def is_admin():
     async def predicate(ctx):
-        guild_id = ctx.author.guild.id
-        owner_query = await Guild.filter(id=guild_id).values_list("owner_id")
-        admin_query = await Guild.filter(id=guild_id).values_list
-        await Tortoise.close_connections()
-        if ctx.author.id in owner_query[0] or admin_query[0]:
+        owner_query = await Guild.filter(id=ctx.author.guild.id).values_list("owner_id")
+        guild = await Guild.get(id=ctx.author.guild.id)
+        admin_ids = [admin.id for admin in await guild.admins.all()]
+        if ctx.author.id in owner_query[0] or admin_ids:
+            print(admin_ids)
             return True
         else:
-            await ctx.respond(
-                "Du besitzt nicht die notwendigen Berechtigungen um diesen Command zu benutzen!"
-            )
+            await ctx.respond("You need to be an Admin to use this command!")
 
     return commands.check(predicate)

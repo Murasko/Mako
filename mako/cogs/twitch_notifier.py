@@ -21,8 +21,7 @@ import discord
 from discord.ext import commands, tasks
 from twitchAPI.twitch import Twitch
 
-from mako.db import database_manager
-from mako.db.database_manager import get_streamer_status, update_streamer_status
+from mako.db.models import Guild
 from mako.utils.checks import is_admin
 
 
@@ -32,6 +31,7 @@ class TwitchNotification(commands.Cog):
         self.save_user_profile_pictures.start()
         self.send_notification_when_live.start()
 
+    @is_admin()
     @discord.slash_command()
     async def reload_twitch_notifier(self, ctx):
         self.bot.reload_extension("mako.cogs.twitch_notifier")
@@ -42,7 +42,12 @@ class TwitchNotification(commands.Cog):
         twitch = await Twitch(
             self.bot.config["twitch_client_id"], self.bot.config["twitch_client_secret"]
         )
-        for guild in self.bot.guilds:
+        for joined_guild in self.bot.guilds:
+            if await Guild.filter
+
+
+
+
             watchlist = await database_manager.get_watchlist(int(guild.id))
             if not watchlist:
                 continue

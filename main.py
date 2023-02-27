@@ -26,6 +26,8 @@ import os
 import platform
 import sys
 
+from mako.db.models import Guild, User
+
 
 if not os.path.isfile("config.json"):
     sys.exit("Couldn't find 'config.json'! Please make sure you've added it.")
@@ -57,20 +59,57 @@ async def init_database() -> None:
     print("Initialized Database")
 
 
-def load_cogs() -> None:
-    for file in os.listdir("cogs"):
+async def guild_owner_init() -> None:
+    for current_guild in bot.guilds:
+        if not current_guild.system_channel:
+            notification_channel = 0
+        else:
+            notification_channel = current_guild.system_channel.id
+        if not await Guild.filter(id=current_guild.id).exists():
+            if not await User.filter(id=current_guild.owner.id).exists():
+                owner, _ = await User.get_or_create(id=current_guild.owner.id)
+                guild, _ = await Guild.get_or_create(
+                    id=current_guild.id,
+                    notification_channel=notification_channel,
+                    owner=owner,
+                )
+            else:
+                owner, _ = await User.get_or_create(id=current_guild.owner.id)
+                guild, _ = await Guild.get_or_create(
+                    id=current_guild.id,
+                    notification_channel=notification_channel,
+                    owner=owner,
+                )
+            print(
+                f"Saved {guild.id} / {current_guild.name} with owner "
+                f"{owner.id} / {str(current_guild.owner)} to Database."
+            )
+        else:
+            continue
+    print("Guildowner Init done.")
+
+
+def load_cogs(bot, cog_dir="mako/cogs", log_file="cog_load.log") -> None:
+    logging.basicConfig(filename=log_file, level=logging.INFO)
+    for file in os.listdir(cog_dir):
         if file.endswith(".py"):
             extension = file[:-3]
             try:
                 bot.load_extension(f"mako.cogs.{extension}")
-                print(f"Loaded Extension {extension}")
+                logging.info(f"Loaded Extension {extension}")
+            except (ImportError, SyntaxError) as e:
+                logging.error(
+                    f"Failed to load extension {extension}\n{type(e).__name__}: {e}"
+                )
             except Exception as e:
-                exception = f"{type(e).__name__}: {e}"
-                print(f"Failed to load extension {extension}\n{exception}")
+                logging.error(
+                    f"Failed to load extension {extension}\n{type(e).__name__}: {e}",
+                    exc_info=True,
+                )
 
 
-# load_cogs()
-bot.load_extension("mako.cogs.orm")
+load_cogs(bot=bot)
+# bot.load_extension("mako.cogs.utils")
 
 
 @bot.event
