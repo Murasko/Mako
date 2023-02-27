@@ -16,4 +16,5 @@
 #
 #  Contact:
 #  info@murasko.de
-from .models import Guild, User, Watchlist, Notifications
+
+from .models import Guild, User, Notifications, Watchlist

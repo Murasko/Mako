@@ -21,7 +21,6 @@
 import discord
 from discord.ext import commands
 
-from mako.db import User, Guild
 from mako.utils.checks import is_admin
 
 

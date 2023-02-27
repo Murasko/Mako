@@ -127,4 +127,4 @@ dmypy.json
 # locals
 mako/config.json
 db.sqlite3*
-
+config.json

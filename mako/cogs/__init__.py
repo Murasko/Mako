@@ -16,3 +16,5 @@
 #
 #  Contact:
 #  info@murasko.de
+
+from mako.db import Guild, User, Notifications, Watchlist
