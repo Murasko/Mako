@@ -30,12 +30,9 @@ class Guild(Model):
     admins = fields.ManyToManyField(
         model_name="models.User", related_name="administered_guilds"
     )
-    watchlist = fields.ManyToManyField(
-        model_name="models.Watchlist", related_name="watchlist"
-    )
 
 
-class User(Model):
+class DiscordUser(Model):
     id = fields.BigIntField(pk=True)
     owned_guilds: fields.ReverseRelation["Guild"]
     administered_guilds: fields.ManyToManyRelation["Guild"]
@@ -43,9 +40,81 @@ class User(Model):
 
 class Watchlist(Model):
     username = fields.CharField(pk=True, max_length=50)
+    discord_guild = 
+    notification_sent = 
 
 
-class Notifications(Model):
+class TwitchUser(Model):
     username = fields.CharField(pk=True, max_length=50)
     profile_picture_url = fields.CharField(max_length=500)
     status = fields.CharField(max_length=8, default="offline")
+    
+from tortoise import fields
+from tortoise.models import Model
+
+
+class TwitchUser(Model):
+    id = fields.IntField(pk=True)
+    username = fields.CharField(max_length=100, unique=True)
+    twitch_id = fields.CharField(max_length=100)
+
+
+class DiscordGuild(Model):
+    id = fields.BigIntField(pk=True)
+    admins = fields.ManyToManyField('models.DiscordUser', related_name='admin_of_guilds')
+
+
+class DiscordUser(Model):
+    id = fields.BigIntField(pk=True)
+    is_bot_admin = fields.BooleanField(default=False)
+    guilds = fields.ManyToManyField('models.DiscordGuild', related_name='members')
+
+
+class Watchlist(Model):
+    id = fields.IntField(pk=True)
+    twitch_user = fields.ForeignKeyField('models.TwitchUser', related_name='watchlists')
+    guild = fields.ForeignKeyField('models.DiscordGuild', related_name='watchlists')
+
+
+class NotificationHistory(Model):
+    id = fields.IntField(pk=True)
+    twitch_user = fields.ForeignKeyField('models.TwitchUser', related_name='notifications')
+    last_notification = fields.DatetimeField()
+
+
+from tortoise.models import Model
+from tortoise import fields
+
+
+class TwitchUser(Model):
+    id = fields.IntField(pk=True)
+    username = fields.CharField(max_length=100)
+    twitch_id = fields.CharField(max_length=30)
+
+
+class DiscordGuild(Model):
+    id = fields.IntField(pk=True)
+    guild_id = fields.CharField(max_length=30, unique=True)
+    notification_channel_id = fields.CharField(max_length=30)
+    twitch_users = fields.ManyToManyField('models.TwitchUser', related_name='discord_guilds', through='watchlist')
+
+
+class Watchlist(Model):
+    id = fields.IntField(pk=True)
+    user = fields.ForeignKeyField('models.TwitchUser', related_name='watchlists')
+    guild = fields.ForeignKeyField('models.DiscordGuild', related_name='watchlists')
+    is_live = fields.BooleanField(default=False)
+    last_notification = fields.DatetimeField(null=True)
+
+
+class BotAdministrator(Model):
+    id = fields.IntField(pk=True)
+    user_id = fields.CharField(max_length=30, unique=True)
+    guild = fields.ForeignKeyField('models.DiscordGuild', related_name='bot_administrators')
+
+
+class ServerOwner(Model):
+    id = fields.IntField(pk=True)
+    user_id = fields.CharField(max_length=30, unique=True)
+    guild = fields.ForeignKeyField('models.DiscordGuild', related_name='server_owner')
+

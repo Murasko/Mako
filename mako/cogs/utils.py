@@ -21,7 +21,7 @@
 import discord
 from discord.ext import commands
 
-from mako.db.models import Guild, User
+from mako.db.models import Guild, DiscordUser
 from mako.utils.checks import is_admin, is_owner
 
 
@@ -99,7 +99,7 @@ class Utils(commands.Cog):
     async def add_administrator(self, ctx, user_id) -> None:
         guild_id = ctx.author.guild.id
         guild = await Guild.get(id=guild_id)
-        user, _ = await User.get_or_create(id=user_id)
+        user, _ = await DiscordUser.get_or_create(id=user_id)
         await guild.admins.add(user)
         await ctx.respond(f"Added {user_id} as Admin.")
 

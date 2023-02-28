@@ -26,7 +26,7 @@ import os
 import platform
 import sys
 
-from mako.db.models import Guild, User
+from mako.db.models import Guild, DiscordUser
 
 
 if not os.path.isfile("config.json"):
@@ -66,15 +66,15 @@ async def guild_owner_init() -> None:
         else:
             notification_channel = current_guild.system_channel.id
         if not await Guild.filter(id=current_guild.id).exists():
-            if not await User.filter(id=current_guild.owner.id).exists():
-                owner, _ = await User.get_or_create(id=current_guild.owner.id)
+            if not await DiscordUser.filter(id=current_guild.owner.id).exists():
+                owner, _ = await DiscordUser.get_or_create(id=current_guild.owner.id)
                 guild, _ = await Guild.get_or_create(
                     id=current_guild.id,
                     notification_channel=notification_channel,
                     owner=owner,
                 )
             else:
-                owner, _ = await User.get_or_create(id=current_guild.owner.id)
+                owner, _ = await DiscordUser.get_or_create(id=current_guild.owner.id)
                 guild, _ = await Guild.get_or_create(
                     id=current_guild.id,
                     notification_channel=notification_channel,
