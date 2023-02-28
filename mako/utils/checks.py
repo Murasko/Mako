@@ -20,8 +20,7 @@
 from discord.ext import commands
 from tortoise import Tortoise
 
-
-from mako.db import User, Guild
+from mako.db import Guild
 
 
 def is_owner():
