@@ -92,7 +92,7 @@ async def guild_owner_init() -> None:
 def load_cogs(bot, cog_dir="mako/cogs", log_file="cog_load.log") -> None:
     logging.basicConfig(filename=log_file, level=logging.INFO)
     for file in os.listdir(cog_dir):
-        if file.endswith(".py"):
+        if file.endswith(".py") and not file.startswith('__'):
             extension = file[:-3]
             try:
                 bot.load_extension(f"mako.cogs.{extension}")
@@ -121,6 +121,7 @@ async def on_ready() -> None:
     print()
     await change_discord_status()
     print()
+    await guild_owner_init()
 
 
 async def change_discord_status() -> None:
