@@ -20,16 +20,12 @@
 from discord.ext import commands
 from tortoise import Tortoise
 
-from mako.db import Guild
+from mako.db.models import Guild
 
 
 def is_owner():
     async def predicate(ctx):
-        guild_id = ctx.author.guild.id
-        owner_query = await Guild.filter(id=guild_id).values_list("owner_id")
-        await Tortoise.close_connections()
-        owner_id = owner_query[0][0]
-        if ctx.author.id == owner_id:
+        if ctx.author.id == ctx.guild.owner.id:
             return True
         else:
             await ctx.respond("You need to be the Owner to use this command!")
@@ -39,13 +35,12 @@ def is_owner():
 
 def is_admin():
     async def predicate(ctx):
-        owner_query = await Guild.filter(id=ctx.author.guild.id).values_list("owner_id")
         guild = await Guild.get(id=ctx.author.guild.id)
         admin_ids = [admin.id for admin in await guild.admins.all()]
-        if ctx.author.id in owner_query[0] or admin_ids:
-            print(admin_ids)
+        if ctx.author.id in admin_ids or guild.owner:
             return True
         else:
             await ctx.respond("You need to be an Admin to use this command!")
+        await Tortoise.close_connections()
 
     return commands.check(predicate)
