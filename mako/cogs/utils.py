@@ -49,12 +49,8 @@ class Utils(commands.Cog):
             member = ctx.author
 
         user_avatar = member.display_avatar
-        roles = []
-        for role in member.roles:
-            if role.name == "@everyone":
-                pass
-            else:
-                roles.append(str(role.name))
+        roles = [role.name for role in member.roles]
+        roles.remove("@everyone")
 
         embed = discord.Embed(
             title=f"User-information für {member}", colour=discord.Colour.random()
@@ -66,7 +62,7 @@ class Utils(commands.Cog):
         embed.add_field(
             name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y")
         )
-        embed.add_field(name="Roles: ", value=str(roles), inline=False)
+        embed.add_field(name="Roles: ", value=str(", ".join(roles)), inline=False)
 
         await ctx.respond(embed=embed)
 
@@ -83,7 +79,7 @@ class Utils(commands.Cog):
             admins.append(f"ID: {admin} / Name: {user.name}#{user.discriminator}")
         format_admins = "\n".join(admins)
         await ctx.respond(
-            f"These Users are currently Admins on this Guild:\n{format_admins}"
+            f"These users are currently admins on this guild:\n{format_admins}"
         )
 
     @is_owner()
@@ -94,7 +90,7 @@ class Utils(commands.Cog):
         guild = await Guild.get(id=ctx.author.guild.id)
         user, _ = await DiscordUser.get_or_create(id=user_id)
         await guild.admins.add(user)
-        await ctx.respond(f"Added {user_id} as Admin.")
+        await ctx.respond(f"Added {user_id} as admin.")
 
     @is_owner()
     @discord.slash_command(
@@ -104,7 +100,30 @@ class Utils(commands.Cog):
         guild = await Guild.get(id=ctx.author.guild.id)
         user = await DiscordUser.get(id=user_id)
         await guild.admins.remove(user)
-        await ctx.respond(f"Removed {user_id} as Admin.")
+        await ctx.respond(f"Removed {user_id} as admin.")
+
+    @is_admin()
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
+    async def set_notification_channel(self, ctx, notification_channel_id):
+        await Guild.filter(id=ctx.author.guild.id).update(
+            notification_channel=notification_channel_id
+        )
+        await ctx.respond(
+            f"Set channel with ID {notification_channel_id} as notification channel."
+        )
+
+    @is_admin()
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
+    async def get_notification_channel(self, ctx):
+        guild = await Guild.get(id=ctx.author.guild.id)
+        channel = self.bot.get_channel(guild.notification_channel)
+        await ctx.respond(
+            f"Current notification channel: \nName: {channel} // ID: {channel.id}"
+        )
 
 
 def setup(bot):
