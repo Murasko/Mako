@@ -21,33 +21,29 @@ from tortoise import fields
 from tortoise.models import Model
 
 
-class Guild(Model):
+class DiscordGuild(Model):
     id = fields.BigIntField(pk=True)
     notification_channel = fields.BigIntField()
     owner = fields.BigIntField()
-    admins = fields.ManyToManyField(
-        "models.DiscordUser",
-        related_name="admin_guilds",
-        through="bot_admins",
-        backward_key="guild_id",
-    )
+    admins = fields.ManyToManyField("models.DiscordUser", related_name="admins")
 
 
 class DiscordUser(Model):
-    id = fields.BigIntField(pk=True)
-    guilds = fields.ManyToManyField("models.Guild", related_name="members")
+    id = fields.IntField(pk=True)
+    user_id = fields.BigIntField()
+    guilds = fields.ManyToManyField("models.DiscordGuild", related_name="members")
 
 
 class TwitchUser(Model):
-    id = fields.IntField(pk=True)
-    username = fields.CharField(max_length=100, unique=True)
+    username = fields.CharField(pk=True, max_length=100, unique=True)
     twitch_id = fields.CharField(max_length=100)
 
 
 class Watchlist(Model):
     id = fields.IntField(pk=True)
     twitch_user = fields.ForeignKeyField("models.TwitchUser", related_name="watchlists")
-    guild = fields.ForeignKeyField("models.Guild", related_name="watchlists")
+    guild = fields.ForeignKeyField("models.DiscordGuild", related_name="watchlists")
+    twitch_profile_picture_url = fields.CharField(max_length=200)
 
 
 class NotificationHistory(Model):
@@ -55,16 +51,5 @@ class NotificationHistory(Model):
     twitch_user = fields.ForeignKeyField(
         "models.TwitchUser", related_name="notifications"
     )
+    guild_id = fields.BigIntField()
     last_notification = fields.DatetimeField()
-
-
-class BotAdmin(Model):
-    user = fields.ForeignKeyField("models.DiscordUser", on_delete=fields.CASCADE)
-    guild = fields.ForeignKeyField(
-        "models.Guild",
-        on_delete=fields.CASCADE,
-        related_name="bot_admins",
-    )
-
-    class Meta:
-        unique_together = ("user", "guild")

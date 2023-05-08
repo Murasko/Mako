@@ -1,3 +1,0 @@
-py-cord==2.4.0
-twitchAPI==3.9.0
-tortoise-orm==0.19.3

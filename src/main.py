@@ -16,27 +16,27 @@
 #
 #  Contact:
 #  info@murasko.de
+import asyncio
 
 import discord
-from tortoise import Tortoise, run_async
+from tortoise import Tortoise
+from dotenv import dotenv_values
 
-import json
 import logging
 import os
 import platform
 import sys
 
-from mako.db.models import Guild, DiscordUser
+from mako.db.models import DiscordGuild, DiscordUser
 
-if not os.path.isfile("config.json"):
-    sys.exit("Couldn't find 'config.json'! Please make sure you've added it.")
+if not os.path.isfile(".env"):
+    sys.exit("Couldn't find '.env'! Please make sure you've added it.")
 else:
-    with open("config.json") as config_file:
-        config = json.load(config_file)
+    config = dotenv_values(".env")
 
 logger = logging.getLogger("discord")
 logger.setLevel(logging.INFO)
-handler = logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w")
+handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 
 handler.setFormatter(
     logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
@@ -45,7 +45,24 @@ logger.addHandler(handler)
 
 intents = discord.Intents.all()
 
-bot = discord.Bot(intents=intents)
+
+class Mako(discord.Bot):
+    async def close(self) -> None:
+        await Tortoise.close_connections()
+        await super().close()
+
+    async def on_ready(self) -> None:
+        print(f"Logged in as {bot.user}")
+        print(f"py-cord API version: {discord.__version__}")
+        print(f"Python version: {platform.python_version()}")
+        print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
+        print()
+        await change_discord_status()
+        print()
+        await guild_init()
+
+
+bot = Mako(intents=intents)
 
 bot.config = config
 
@@ -54,8 +71,8 @@ async def init_database() -> None:
     await Tortoise.init(
         db_url="sqlite://mako/db/db.sqlite3", modules={"models": ["mako.db.models"]}
     )
-    await Tortoise.generate_schemas()
-    print("Initialized Database")
+    await Tortoise.generate_schemas(safe=True)
+    print("Database startup done")
 
 
 async def guild_init() -> None:
@@ -64,16 +81,16 @@ async def guild_init() -> None:
             notification_channel = 0
         else:
             notification_channel = current_guild.system_channel.id
-        if not await Guild.filter(id=current_guild.id).exists():
+        if not await DiscordGuild.filter(id=current_guild.id).exists():
             owner_id = current_guild.owner.id
             if not await DiscordUser.filter(id=current_guild.owner.id).exists():
-                guild, _ = await Guild.get_or_create(
+                guild, _ = await DiscordGuild.get_or_create(
                     id=current_guild.id,
                     notification_channel=notification_channel,
                     owner=owner_id,
                 )
             else:
-                guild, _ = await Guild.get_or_create(
+                guild, _ = await DiscordGuild.get_or_create(
                     id=current_guild.id,
                     notification_channel=notification_channel,
                     owner=owner_id,
@@ -84,10 +101,10 @@ async def guild_init() -> None:
             )
         else:
             continue
-    print("Initialized Guilds Table")
+    print("Guild init done")
 
 
-def load_cogs(cog_dir="mako/cogs", log_file="logs/cog_load.log") -> None:
+def load_cogs(cog_dir="mako/cogs", log_file="cog_load.log") -> None:
     logging.basicConfig(filename=log_file, level=logging.INFO)
     for file in os.listdir(cog_dir):
         if file.endswith(".py") and not file.startswith("__"):
@@ -106,9 +123,6 @@ def load_cogs(cog_dir="mako/cogs", log_file="logs/cog_load.log") -> None:
                 )
 
 
-load_cogs()
-
-
 async def change_discord_status() -> None:
     await bot.change_presence(
         activity=discord.Activity(
@@ -120,18 +134,13 @@ async def change_discord_status() -> None:
     print("Status set")
 
 
-@bot.event
-async def on_ready() -> None:
-    print(f"Logged in as {bot.user}")
-    print(f"py-cord API version: {discord.__version__}")
-    print(f"Python version: {platform.python_version()}")
-    print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
-    print()
-    await change_discord_status()
-    print()
-    await guild_init()
-
+async def main():
+    await init_database()
+    load_cogs()
+    await bot.start(config["DISCORD_TOKEN"])
 
 if __name__ == "__main__":
-    run_async(init_database())
-    bot.run(config["discord_token"])
+    asyncio.run(main())
+    # bot.loop.create_task(init_database())
+    # load_cogs()
+    # bot.run(config["DISCORD_TOKEN"])

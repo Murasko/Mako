@@ -21,8 +21,8 @@
 import discord
 from discord.ext import commands
 
-from mako.db.models import Guild, DiscordUser
-from mako.utils.checks import is_owner, is_admin
+from src.mako.db.models import DiscordGuild, DiscordUser
+from src.mako.utils.checks import is_owner, is_admin
 
 
 class Utils(commands.Cog):
@@ -71,7 +71,7 @@ class Utils(commands.Cog):
         guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
     )
     async def get_administrator(self, ctx) -> None:
-        guild = await Guild.get(id=ctx.author.guild.id)
+        guild = await DiscordGuild.get(id=ctx.author.guild.id)
         admin_ids = [admin.id for admin in await guild.admins]
         admins = []
         for admin in admin_ids:
@@ -87,7 +87,7 @@ class Utils(commands.Cog):
         guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
     )
     async def add_administrator(self, ctx, user_id) -> None:
-        guild = await Guild.get(id=ctx.author.guild.id)
+        guild = await DiscordGuild.get(id=ctx.author.guild.id)
         user, _ = await DiscordUser.get_or_create(id=user_id)
         await guild.admins.add(user)
         await ctx.respond(f"Added {user_id} as admin.")
@@ -97,7 +97,7 @@ class Utils(commands.Cog):
         guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
     )
     async def remove_administrator(self, ctx, user_id) -> None:
-        guild = await Guild.get(id=ctx.author.guild.id)
+        guild = await DiscordGuild.get(id=ctx.author.guild.id)
         user = await DiscordUser.get(id=user_id)
         await guild.admins.remove(user)
         await ctx.respond(f"Removed {user_id} as admin.")
@@ -107,7 +107,7 @@ class Utils(commands.Cog):
         guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
     )
     async def set_notification_channel(self, ctx, notification_channel_id):
-        await Guild.filter(id=ctx.author.guild.id).update(
+        await DiscordGuild.filter(id=ctx.author.guild.id).update(
             notification_channel=notification_channel_id
         )
         await ctx.respond(
@@ -119,7 +119,7 @@ class Utils(commands.Cog):
         guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
     )
     async def get_notification_channel(self, ctx):
-        guild = await Guild.get(id=ctx.author.guild.id)
+        guild = await DiscordGuild.get(id=ctx.author.guild.id)
         channel = self.bot.get_channel(guild.notification_channel)
         await ctx.respond(
             f"Current notification channel: \nName: {channel} // ID: {channel.id}"
