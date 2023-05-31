@@ -35,7 +35,7 @@ def is_owner():
 def is_admin():
     async def predicate(ctx):
         guild = await DiscordGuild.get(id=ctx.author.guild.id)
-        admin_ids = [admin.user_id for admin in await guild.admins.all()]
+        admin_ids = [admin.user_id for admin in await guild.admins]
         if ctx.author.id in admin_ids or guild.owner:
             return True
         else:

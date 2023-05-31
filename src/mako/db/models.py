@@ -23,33 +23,34 @@ from tortoise.models import Model
 
 class DiscordGuild(Model):
     id = fields.BigIntField(pk=True)
-    notification_channel = fields.BigIntField()
+    notification_channel = fields.BigIntField(null=True)
     owner = fields.BigIntField()
-    admins = fields.ManyToManyField("models.DiscordUser", related_name="admins")
+    admins: fields.ManyToManyRelation["DiscordUser"] = fields.ManyToManyField(
+        "models.DiscordUser", related_name="admin_guilds"
+    )
+    users: fields.ManyToManyRelation["DiscordUser"] = fields.ManyToManyField(
+        "models.DiscordUser", related_name="guilds"
+    )
+    twitch_users: fields.ReverseRelation["GuildTwitchUser"]
 
 
 class DiscordUser(Model):
-    id = fields.IntField(pk=True)
-    user_id = fields.BigIntField()
-    guilds = fields.ManyToManyField("models.DiscordGuild", related_name="members")
+    user_id = fields.BigIntField(pk=True)
+    admin_guild: fields.ManyToManyRelation["DiscordUser"]
+    guilds: fields.ManyToManyRelation["DiscordUser"]
 
 
 class TwitchUser(Model):
     username = fields.CharField(pk=True, max_length=100, unique=True)
-    twitch_id = fields.CharField(max_length=100)
+    profile_picture_url = fields.CharField(max_length=200, null=True)
+    guilds: fields.ReverseRelation["GuildTwitchUser"]
 
 
-class Watchlist(Model):
-    id = fields.IntField(pk=True)
-    twitch_user = fields.ForeignKeyField("models.TwitchUser", related_name="watchlists")
-    guild = fields.ForeignKeyField("models.DiscordGuild", related_name="watchlists")
-    twitch_profile_picture_url = fields.CharField(max_length=200)
-
-
-class NotificationHistory(Model):
-    id = fields.IntField(pk=True)
-    twitch_user = fields.ForeignKeyField(
-        "models.TwitchUser", related_name="notifications"
+class GuildTwitchUser(Model):
+    guild: fields.ForeignKeyRelation["DiscordGuild"] = fields.ForeignKeyField(
+        "models.DiscordGuild", related_name="twitch_users"
     )
-    guild_id = fields.BigIntField()
-    last_notification = fields.DatetimeField()
+    twitch_user: fields.ForeignKeyRelation["TwitchUser"] = fields.ForeignKeyField(
+        "models.TwitchUser", related_name="guilds"
+    )
+    last_notification_time = fields.DatetimeField(null=True)

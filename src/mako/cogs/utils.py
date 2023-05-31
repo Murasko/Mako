@@ -29,10 +29,25 @@ class Utils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    reload = discord.SlashCommandGroup("reload", "Commands to reload modules")
+    utils = discord.SlashCommandGroup("utils", "Useful small tools")
+
     @is_admin()
-    @discord.slash_command()
-    async def reload_utils(self, ctx):
-        self.bot.reload_extension("mako.cogs.utils")
+    @reload.command(description="Used to reload the greetings module")
+    async def greetings(self, ctx):
+        self.bot.reload_extension("src.mako.cogs.greetings")
+        await ctx.respond("Reloaded Greetings.")
+
+    @is_admin()
+    @reload.command(description="Used to reload the twitch notification module")
+    async def twitch_notifier(self, ctx) -> None:
+        self.bot.reload_extension("src.mako.cogs.twitch_notifier")
+        await ctx.respond("Reloaded Twitch Notifier.")
+
+    @is_admin()
+    @reload.command(description="Used to reload the utils module")
+    async def utils(self, ctx):
+        self.bot.reload_extension("src.mako.cogs.utils")
         await ctx.respond("Reloaded Utils.")
 
     @discord.slash_command()
@@ -72,15 +87,18 @@ class Utils(commands.Cog):
     )
     async def get_administrator(self, ctx) -> None:
         guild = await DiscordGuild.get(id=ctx.author.guild.id)
-        admin_ids = [admin.id for admin in await guild.admins]
+        admin_ids = [admin.user_id for admin in await guild.admins]
         admins = []
         for admin in admin_ids:
             user = self.bot.get_user(admin)
             admins.append(f"ID: {admin} / Name: {user.name}#{user.discriminator}")
         format_admins = "\n".join(admins)
-        await ctx.respond(
-            f"These users are currently admins on this guild:\n{format_admins}"
-        )
+        if not admins:
+            await ctx.respond(f"There are currently no users added as admins.")
+        else:
+            await ctx.respond(
+                f"These users are currently admins on this guild:\n{format_admins}"
+            )
 
     @is_owner()
     @discord.slash_command(
@@ -88,7 +106,7 @@ class Utils(commands.Cog):
     )
     async def add_administrator(self, ctx, user_id) -> None:
         guild = await DiscordGuild.get(id=ctx.author.guild.id)
-        user, _ = await DiscordUser.get_or_create(id=user_id)
+        user, _ = await DiscordUser.get_or_create(user_id=user_id)
         await guild.admins.add(user)
         await ctx.respond(f"Added {user_id} as admin.")
 
@@ -98,7 +116,7 @@ class Utils(commands.Cog):
     )
     async def remove_administrator(self, ctx, user_id) -> None:
         guild = await DiscordGuild.get(id=ctx.author.guild.id)
-        user = await DiscordUser.get(id=user_id)
+        user = await DiscordUser.get(user_id=user_id)
         await guild.admins.remove(user)
         await ctx.respond(f"Removed {user_id} as admin.")
 

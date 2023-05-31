@@ -25,11 +25,6 @@ class Greetings(commands.Cog, name="greetings"):
     def __init__(self, bot):
         self.bot = bot
 
-    @discord.slash_command()
-    async def reload_greetings(self, ctx):
-        self.bot.reload_extension("mako.cogs.greetings")
-        await ctx.respond("Reloaded Greetings.")
-
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member) -> None:
         await member.guild.system_channel.send(f"Hi {member.mention}, viel Spaß hier!")

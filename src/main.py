@@ -16,21 +16,21 @@
 #
 #  Contact:
 #  info@murasko.de
-import asyncio
 
 import discord
 from tortoise import Tortoise
 from dotenv import dotenv_values
 
+import asyncio
 import logging
 import os
 import platform
 import sys
 
-from mako.db.models import DiscordGuild, DiscordUser
+from src.mako.db.models import DiscordGuild, DiscordUser
 
 if not os.path.isfile(".env"):
-    sys.exit("Couldn't find '.env'! Please make sure you've added it.")
+    sys.exit("Couldn't find '.env'! Please make sure you've created it.")
 else:
     config = dotenv_values(".env")
 
@@ -69,7 +69,7 @@ bot.config = config
 
 async def init_database() -> None:
     await Tortoise.init(
-        db_url="sqlite://mako/db/db.sqlite3", modules={"models": ["mako.db.models"]}
+        db_url="sqlite://mako/db/db.sqlite3", modules={"models": ["src.mako.db.models"]}
     )
     await Tortoise.generate_schemas(safe=True)
     print("Database startup done")
@@ -83,7 +83,7 @@ async def guild_init() -> None:
             notification_channel = current_guild.system_channel.id
         if not await DiscordGuild.filter(id=current_guild.id).exists():
             owner_id = current_guild.owner.id
-            if not await DiscordUser.filter(id=current_guild.owner.id).exists():
+            if not await DiscordUser.filter(user_id=current_guild.owner.id).exists():
                 guild, _ = await DiscordGuild.get_or_create(
                     id=current_guild.id,
                     notification_channel=notification_channel,
@@ -110,7 +110,7 @@ def load_cogs(cog_dir="mako/cogs", log_file="cog_load.log") -> None:
         if file.endswith(".py") and not file.startswith("__"):
             extension = file[:-3]
             try:
-                bot.load_extension(f"mako.cogs.{extension}")
+                bot.load_extension(f"src.mako.cogs.{extension}")
                 logging.info(f"Loaded Extension {extension}")
             except (ImportError, SyntaxError) as e:
                 logging.error(
@@ -121,6 +121,10 @@ def load_cogs(cog_dir="mako/cogs", log_file="cog_load.log") -> None:
                     f"Failed to load extension {extension}\n{type(e).__name__}: {e}",
                     exc_info=True,
                 )
+    print("Loaded Cogs")
+
+
+load_cogs()
 
 
 async def change_discord_status() -> None:
@@ -134,13 +138,6 @@ async def change_discord_status() -> None:
     print("Status set")
 
 
-async def main():
-    await init_database()
-    load_cogs()
-    await bot.start(config["DISCORD_TOKEN"])
-
 if __name__ == "__main__":
-    asyncio.run(main())
-    # bot.loop.create_task(init_database())
-    # load_cogs()
-    # bot.run(config["DISCORD_TOKEN"])
+    asyncio.run(init_database())
+    bot.run(config["DISCORD_TOKEN"])

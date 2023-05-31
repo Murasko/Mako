@@ -16,108 +16,128 @@
 #
 #  Contact:
 #  info@murasko.de
-
 import discord
 from discord.ext import commands, tasks
+from twitchAPI.helper import first
 from twitchAPI.twitch import Twitch
 
-from src.mako.db.models import DiscordGuild
-from src.mako.db.models import Watchlist
+from datetime import datetime
+
+from src.mako.db.models import TwitchUser, DiscordGuild, GuildTwitchUser
 from src.mako.utils.checks import is_admin
 
 
 class TwitchNotification(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        # self.save_user_profile_pictures.start()
-        # self.send_notification_when_live.start()
+        self.update_user_profile_pictures.start()
+        self.send_live_notification.start()
+
+    @tasks.loop(hours=6)
+    async def update_user_profile_pictures(self) -> None:
+        for user in await TwitchUser.all():
+            await self.save_profile_picture_url(user.username)
+
+    async def save_profile_picture_url(self, username: str) -> None:
+        twitch = await Twitch(
+            self.bot.config["TWITCH_CLIENT_ID"], self.bot.config["TWITCH_CLIENT_SECRET"]
+        )
+        user = await first(twitch.get_users(logins=username))
+        await TwitchUser.filter(username=username.lower()).update(
+            profile_picture_url=user.profile_image_url
+        )
+
+    @tasks.loop(seconds=10)
+    async def send_live_notification(self) -> None:
+        twitch = await Twitch(
+            self.bot.config["TWITCH_CLIENT_ID"], self.bot.config["TWITCH_CLIENT_SECRET"]
+        )
+
+        async for guild in DiscordGuild.exclude(
+            notification_channel=0
+        ).prefetch_related("twitch_users"):
+            notification_channel = guild.notification_channel
+            partial_notification_channel = self.bot.get_partial_messageable(
+                notification_channel
+            )
+            guild_twitch_users = await guild.twitch_users.all()
+
+            for guild_twitch_user in guild_twitch_users:
+                twitch_user = await TwitchUser.filter(
+                    pk=guild_twitch_user.twitch_user_id
+                ).first()
+                streams = twitch.get_streams(
+                    user_login=twitch_user.username, stream_type="live"
+                )
+                async for stream in streams:
+                    if (
+                        guild_twitch_user.last_notification_time is None
+                        or stream.started_at > guild_twitch_user.last_notification_time
+                    ):
+                        embed = discord.Embed(
+                            title=f"{stream.user_login} ist Live",
+                            colour=discord.Colour.random(),
+                            url=f"https://www.twitch.tv/{stream.user_login}",
+                        )
+                        embed.set_author(name="Mako")
+                        embed.set_thumbnail(url=twitch_user.profile_picture_url)
+                        embed.add_field(name="Titel: ", value=stream.title)
+                        embed.add_field(name="Spielt: ", value=stream.game_name)
+                        embed.set_image(
+                            url=stream.thumbnail_url.replace("{width}", "960").replace(
+                                "{height}", "675"
+                            )
+                        )
+                        current_time = datetime.now().astimezone()
+                        guild_twitch_user.last_notification_time = current_time
+                        await guild_twitch_user.save()
+                        await partial_notification_channel.send(embed=embed)
 
     @is_admin()
-    @discord.slash_command()
-    async def reload_twitch_notifier(self, ctx):
-        self.bot.reload_extension("mako.cogs.twitch_notifier")
-        await ctx.respond("Reloaded Twitch Notifier.")
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
+    async def add_watchlist(self, ctx, username: str) -> None:
+        if await GuildTwitchUser.filter(
+            guild=ctx.author.guild.id, twitch_user=username.lower()
+        ).exists():
+            await ctx.respond(
+                f"User {username} is already on the watchlist for this guild."
+            )
+        else:
+            twitch_user, _ = await TwitchUser.get_or_create(username=username.lower())
+            await GuildTwitchUser(
+                guild_id=ctx.author.guild.id, twitch_user=twitch_user
+            ).save()
+            await self.save_profile_picture_url(username.lower())
+            await ctx.respond(f"Added {username.lower()} to watchlist.")
 
-    # @tasks.loop(hours=48)
-    # async def save_user_profile_pictures(self) -> None:
-    #     twitch = await Twitch(
-    #         self.bot.config["TWITCH_CLIENT_ID"], self.bot.config["TWITCH_CLIENT_SECRET"]
-    #     )
-    #     for uid in Watchlist.id:
-    #         user = await Watchlist.get(id=uid)
-    #         profile_picture_url = user.twitch_profile_picture_url
-    #
-    # @tasks.loop(seconds=10)
-    # async def send_notification_when_live(self) -> None:
-    #     twitch = await Twitch(
-    #         self.bot.config["TWITCH_CLIENT_ID"], self.bot.config["TWITCH_CLIENT_SECRET"]
-    #     )
-    #     for guild in self.bot.guilds:
-    #         notification_channel = await database_manager.get_notification_channel(
-    #             int(guild.id)
-    #         )
-    #         if not notification_channel:
-    #             continue
-    #         else:
-    #             watchlist = await database_manager.get_watchlist(int(guild.id))
-    #             if not watchlist:
-    #                 continue
-    #             else:
-    #                 partial_notification_channel = self.bot.get_partial_messageable(
-    #                     notification_channel
-    #                 )
-    #                 streams = twitch.get_streams(
-    #                     stream_type="live", user_login=watchlist
-    #                 )
-    #                 async for stream in streams:
-    #                     # Überprüfe den Stream-Status und sende die Benachrichtigung nur, wenn er offline ist
-    #                     current_status = await get_streamer_status(stream.user_login)
-    #                     if current_status != "live":
-    #                         # Update the streamer status in the database to 'live'
-    #                         await update_streamer_status(stream.user_login, "live")
-    #                         # Send notification
-    #                         profile_image_url = (
-    #                             await database_manager.get_saved_profile_images(
-    #                                 stream.user_login
-    #                             )
-    #                         )
-    #                         embed = discord.Embed(
-    #                             title=f"{stream.user_login} ist Live",
-    #                             colour=discord.Colour.random(),
-    #                             url=f"https://www.twitch.tv/{stream.user_login}",
-    #                         )
-    #                         embed.set_author(name="Mako")
-    #                         embed.set_thumbnail(url=profile_image_url)
-    #                         embed.add_field(name="Titel: ", value=stream.title)
-    #                         embed.add_field(name="Spielt: ", value=stream.game_name)
-    #                         await partial_notification_channel.send(embed=embed)
-    #
-    # @discord.slash_command(
-    #     guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    # )
-    # @is_admin()
-    # async def add_watchlist(self, ctx, username: str) -> None:
-    #     await ctx.respond(await database_manager.set_watchlist(ctx.guild.id, username))
-    #     await self.save_user_profile_pictures()
-    #
-    # @discord.slash_command(
-    #     guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    # )
-    # @is_admin()
-    # async def get_watchlist(self, ctx) -> None:
-    #     watchlist = await database_manager.get_watchlist(ctx.guild.id)
-    #     await ctx.respond(
-    #         f"The following Users are on the Watchlist on {ctx.guild}: {watchlist}"
-    #     )
-    #
-    # @discord.slash_command(
-    #     guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    # )
-    # @is_admin()
-    # async def remove_watchlist(self, ctx, username: str) -> None:
-    #     await ctx.respond(
-    #         await database_manager.remove_watchlist(ctx.guild.id, username)
-    #     )
+    @is_admin()
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
+    async def get_watchlist(self, ctx) -> None:
+        if await GuildTwitchUser.filter(guild=ctx.author.guild.id).exists():
+            guild_watchlist = await GuildTwitchUser.filter(
+                guild_id=ctx.author.guild.id
+            ).prefetch_related("twitch_user")
+            watchlist = [user.twitch_user.username for user in guild_watchlist]
+            watchlist_output = "\n".join(watchlist)
+            await ctx.respond(
+                f"The following users are on the watchlist: \n{watchlist_output}"
+            )
+        else:
+            await ctx.respond("No watchlist configured yet.")
+
+    @is_admin()
+    @discord.slash_command(
+        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    )
+    async def remove_watchlist(self, ctx, username: str) -> None:
+        await GuildTwitchUser.filter(
+            guild=ctx.author.guild.id, twitch_user=username.lower()
+        ).delete()
+        await ctx.respond(f"Removed {username.lower()} from the watchlist.")
 
 
 def setup(bot):

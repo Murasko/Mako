@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 py-cord = "2.4.1"
-twitchapi = "3.9.0"
+twitchapi = "3.11.0"
 tortoise-orm = "0.19.3"
 python-dotenv = "^1.0.0"
 
