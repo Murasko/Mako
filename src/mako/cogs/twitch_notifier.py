@@ -23,8 +23,8 @@ from twitchAPI.twitch import Twitch
 
 from datetime import datetime
 
-from src.mako.db.models import TwitchUser, DiscordGuild, GuildTwitchUser
-from src.mako.utils.checks import is_admin
+from mako.db.models import TwitchUser, DiscordGuild, GuildTwitchUser
+from mako.utils.checks import is_admin
 
 
 class TwitchNotification(commands.Cog):

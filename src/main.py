@@ -27,7 +27,7 @@ import os
 import platform
 import sys
 
-from src.mako.db.models import DiscordGuild, DiscordUser
+from mako.db.models import DiscordGuild, DiscordUser
 
 if not os.path.isfile(".env"):
     sys.exit("Couldn't find '.env'! Please make sure you've created it.")
@@ -70,7 +70,7 @@ bot.config = config
 
 async def init_database() -> None:
     await Tortoise.init(
-        db_url="sqlite://mako/db/db.sqlite3", modules={"models": ["src.mako.db.models"]}
+        db_url="sqlite://mako/db/db.sqlite3", modules={"models": ["mako.db.models"]}
     )
     await Tortoise.generate_schemas(safe=True)
     print("Database startup done")
@@ -110,7 +110,7 @@ def load_cogs(cog_dir="mako/cogs") -> None:
         if file.endswith(".py") and not file.startswith("__"):
             extension = file[:-3]
             try:
-                bot.load_extension(f"src.mako.cogs.{extension}")
+                bot.load_extension(f"mako.cogs.{extension}")
                 logger.info(f"Loaded Extension {extension}")
             except (ImportError, SyntaxError) as e:
                 logger.error(

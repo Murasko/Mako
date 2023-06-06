@@ -19,7 +19,7 @@
 
 from discord.ext import commands
 
-from src.mako.db.models import DiscordGuild
+from mako.db.models import DiscordGuild
 
 
 def is_owner():

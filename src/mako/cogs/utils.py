@@ -21,8 +21,8 @@
 import discord
 from discord.ext import commands
 
-from src.mako.db.models import DiscordGuild, DiscordUser
-from src.mako.utils.checks import is_owner, is_admin
+from mako.db.models import DiscordGuild, DiscordUser
+from mako.utils.checks import is_owner, is_admin
 
 
 class Utils(commands.Cog):
@@ -39,19 +39,19 @@ class Utils(commands.Cog):
     @is_admin()
     @reload.command(description="Reload the Greetings module")
     async def greetings(self, ctx):
-        self.bot.reload_extension("src.mako.cogs.greetings")
+        self.bot.reload_extension("mako.cogs.greetings")
         await ctx.respond("Reloaded Greetings.")
 
     @is_admin()
     @reload.command(description="Reload the Twitch module")
     async def twitch(self, ctx) -> None:
-        self.bot.reload_extension("src.mako.cogs.twitch_notifier")
+        self.bot.reload_extension("mako.cogs.twitch_notifier")
         await ctx.respond("Reloaded Twitch Notifier.")
 
     @is_admin()
     @reload.command(description="Reload the Utils module")
     async def utils(self, ctx):
-        self.bot.reload_extension("src.mako.cogs.utils")
+        self.bot.reload_extension("mako.cogs.utils")
         await ctx.respond("Reloaded Utils.")
 
     @tools.command(description="Prints the Ping of the Bot")
