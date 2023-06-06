@@ -8,6 +8,7 @@ Discord Bot written in Python, using [pycord](https://github.com/Pycord-Developm
 ## Installation
 
 1. Clone the Repo
-2. Copy or rename `.env_EXAMPLE` to `.env` and fill it
-3. `poetry run main.py`
-
+2. `cd Mako && poetry install` 
+3. `cd src/`
+4. Copy or rename `.env_EXAMPLE` to `.env` and fill it
+5. `poetry run python main.py`
