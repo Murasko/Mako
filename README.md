@@ -2,35 +2,12 @@
 
 Discord Bot written in Python, using [pycord](https://github.com/Pycord-Development/pycord)
 
-## Setup Working dir
+## Requirements
+- [Poetry](https://python-poetry.org/docs/#installation)
 
-Setup your working Directory with the following Commands
-Windows:
+## Installation
 
-```commandline
-python -m venv venv
-.\venv\Scripts\activate 
-python -m pip install -r requirements.txt
-```
+1. Clone the Repo
+2. Copy or rename `.env_EXAMPLE` to `.env` and fill it
+3. `poetry run main.py`
 
-Linux:
-
-```commandline
-python -m venv venv
-source ./venv/bin/activate
-python -m pip install -r requirements.txt
-```
-
-Create config.json and input the Streamers you want to get notified when live:
-
-```
-{
-    "discord_token": "",
-    "notification_channel": "",
-    "twitch_client_id": "",
-    "twitch_client_secret": "",
-    "watchlist": [
-        ""
-    ]
-}
-```
