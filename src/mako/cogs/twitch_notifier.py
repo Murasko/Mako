@@ -33,6 +33,10 @@ class TwitchNotification(commands.Cog):
         self.update_user_profile_pictures.start()
         self.send_live_notification.start()
 
+    watchlist = discord.SlashCommandGroup(
+        "watchlist", "Modify the watchlist to get Twitch notifications", guild_only=True
+    )
+
     @tasks.loop(hours=6)
     async def update_user_profile_pictures(self) -> None:
         for user in await TwitchUser.all():
@@ -47,7 +51,7 @@ class TwitchNotification(commands.Cog):
             profile_picture_url=user.profile_image_url
         )
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(seconds=60)
     async def send_live_notification(self) -> None:
         twitch = await Twitch(
             self.bot.config["TWITCH_CLIENT_ID"], self.bot.config["TWITCH_CLIENT_SECRET"]
@@ -93,11 +97,9 @@ class TwitchNotification(commands.Cog):
                         await guild_twitch_user.save()
                         await partial_notification_channel.send(embed=embed)
 
-    @is_admin()
-    @discord.slash_command(
-        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    )
-    async def add_watchlist(self, ctx, username: str) -> None:
+    # @is_admin()
+    @watchlist.command(description="Add one Twitch username to the watchlist.")
+    async def add(self, ctx, username: str) -> None:
         if await GuildTwitchUser.filter(
             guild=ctx.author.guild.id, twitch_user=username.lower()
         ).exists():
@@ -113,10 +115,8 @@ class TwitchNotification(commands.Cog):
             await ctx.respond(f"Added {username.lower()} to watchlist.")
 
     @is_admin()
-    @discord.slash_command(
-        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    )
-    async def get_watchlist(self, ctx) -> None:
+    @watchlist.command(description="Print the currently configured watchlist.")
+    async def print(self, ctx) -> None:
         if await GuildTwitchUser.filter(guild=ctx.author.guild.id).exists():
             guild_watchlist = await GuildTwitchUser.filter(
                 guild_id=ctx.author.guild.id
@@ -129,11 +129,9 @@ class TwitchNotification(commands.Cog):
         else:
             await ctx.respond("No watchlist configured yet.")
 
-    @is_admin()
-    @discord.slash_command(
-        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    )
-    async def remove_watchlist(self, ctx, username: str) -> None:
+    # @is_admin()
+    @watchlist.command(description="Remove one Twitch username from the watchlist.")
+    async def remove(self, ctx, username: str) -> None:
         await GuildTwitchUser.filter(
             guild=ctx.author.guild.id, twitch_user=username.lower()
         ).delete()

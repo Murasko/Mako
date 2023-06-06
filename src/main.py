@@ -35,8 +35,8 @@ else:
     config = dotenv_values(".env")
 
 logger = logging.getLogger("discord")
-logger.setLevel(logging.INFO)
-handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+logger.setLevel(logging.WARNING)
+handler = logging.FileHandler(filename="mako.log", encoding="utf-8", mode="w")
 
 handler.setFormatter(
     logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
@@ -60,6 +60,7 @@ class Mako(discord.Bot):
         await change_discord_status()
         print()
         await guild_init()
+        print()
 
 
 bot = Mako(intents=intents)
@@ -104,20 +105,19 @@ async def guild_init() -> None:
     print("Guild init done")
 
 
-def load_cogs(cog_dir="mako/cogs", log_file="cog_load.log") -> None:
-    logging.basicConfig(filename=log_file, level=logging.INFO)
+def load_cogs(cog_dir="mako/cogs") -> None:
     for file in os.listdir(cog_dir):
         if file.endswith(".py") and not file.startswith("__"):
             extension = file[:-3]
             try:
                 bot.load_extension(f"src.mako.cogs.{extension}")
-                logging.info(f"Loaded Extension {extension}")
+                logger.info(f"Loaded Extension {extension}")
             except (ImportError, SyntaxError) as e:
-                logging.error(
+                logger.error(
                     f"Failed to load extension {extension}\n{type(e).__name__}: {e}"
                 )
             except Exception as e:
-                logging.error(
+                logger.error(
                     f"Failed to load extension {extension}\n{type(e).__name__}: {e}",
                     exc_info=True,
                 )

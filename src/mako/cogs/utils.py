@@ -30,46 +30,45 @@ class Utils(commands.Cog):
         self.bot = bot
 
     reload = discord.SlashCommandGroup("reload", "Commands to reload modules")
-    utils = discord.SlashCommandGroup("utils", "Useful small tools")
+    tools = discord.SlashCommandGroup("utils", "Useful small tools")
+    admins = discord.SlashCommandGroup("admins", "Manage Bot Administrators")
+    notification_channel = discord.SlashCommandGroup(
+        "notification_channel", "Manage the notification channel"
+    )
 
     @is_admin()
-    @reload.command(description="Used to reload the greetings module")
+    @reload.command(description="Reload the Greetings module")
     async def greetings(self, ctx):
         self.bot.reload_extension("src.mako.cogs.greetings")
         await ctx.respond("Reloaded Greetings.")
 
     @is_admin()
-    @reload.command(description="Used to reload the twitch notification module")
-    async def twitch_notifier(self, ctx) -> None:
+    @reload.command(description="Reload the Twitch module")
+    async def twitch(self, ctx) -> None:
         self.bot.reload_extension("src.mako.cogs.twitch_notifier")
         await ctx.respond("Reloaded Twitch Notifier.")
 
     @is_admin()
-    @reload.command(description="Used to reload the utils module")
+    @reload.command(description="Reload the Utils module")
     async def utils(self, ctx):
         self.bot.reload_extension("src.mako.cogs.utils")
         await ctx.respond("Reloaded Utils.")
 
-    @discord.slash_command()
+    @tools.command(description="Prints the Ping of the Bot")
     async def ping(self, ctx) -> None:
-        await ctx.respond(f"Pong! {round(self.bot.latency * 1000)}ms.")
+        await ctx.respond(f"{round(self.bot.latency * 1000)}ms.")
 
-    @discord.slash_command(guild_ony=True)
+    @discord.user_command(name="Basic User Info", guild_ony=True)
     async def userinfo(
         self,
         ctx,
         member: discord.Member = None,
     ) -> None:
-        if member is None:
-            member = ctx.author
-
         user_avatar = member.display_avatar
         roles = [role.name for role in member.roles]
         roles.remove("@everyone")
 
-        embed = discord.Embed(
-            title=f"User-information für {member}", colour=discord.Colour.random()
-        )
+        embed = discord.Embed(title=f" {member}", colour=discord.Colour.random())
         embed.set_thumbnail(url=user_avatar)
         embed.add_field(
             name="Joined Server: ", value=member.joined_at.strftime("%d/%m/%Y")
@@ -82,10 +81,8 @@ class Utils(commands.Cog):
         await ctx.respond(embed=embed)
 
     @is_admin()
-    @discord.slash_command(
-        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    )
-    async def get_administrator(self, ctx) -> None:
+    @admins.command(description="Print the current Bot Admins.")
+    async def print(self, ctx) -> None:
         guild = await DiscordGuild.get(id=ctx.author.guild.id)
         admin_ids = [admin.user_id for admin in await guild.admins]
         admins = []
@@ -101,30 +98,26 @@ class Utils(commands.Cog):
             )
 
     @is_owner()
-    @discord.slash_command(
-        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    )
-    async def add_administrator(self, ctx, user_id) -> None:
+    @discord.user_command(name="Add Bot Admin")
+    async def add_administrator(self, ctx, member: discord.member) -> None:
         guild = await DiscordGuild.get(id=ctx.author.guild.id)
-        user, _ = await DiscordUser.get_or_create(user_id=user_id)
+        user, _ = await DiscordUser.get_or_create(user_id=member.id)
         await guild.admins.add(user)
-        await ctx.respond(f"Added {user_id} as admin.")
+        await ctx.respond(f"Added {member} to Bot Administrators.")
 
     @is_owner()
-    @discord.slash_command(
-        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
-    )
-    async def remove_administrator(self, ctx, user_id) -> None:
+    @discord.user_command(name="Remove Bot Admin")
+    async def remove_administrator(self, ctx, member: discord.member) -> None:
         guild = await DiscordGuild.get(id=ctx.author.guild.id)
-        user = await DiscordUser.get(user_id=user_id)
+        user = await DiscordUser.get(user_id=member.id)
         await guild.admins.remove(user)
-        await ctx.respond(f"Removed {user_id} as admin.")
+        await ctx.respond(f"Removed {member} from Bot Administrators.")
 
     @is_admin()
-    @discord.slash_command(
-        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    @notification_channel.command(
+        description="Set the Notification Channel for this Guild."
     )
-    async def set_notification_channel(self, ctx, notification_channel_id):
+    async def set(self, ctx, notification_channel_id):
         await DiscordGuild.filter(id=ctx.author.guild.id).update(
             notification_channel=notification_channel_id
         )
@@ -133,10 +126,10 @@ class Utils(commands.Cog):
         )
 
     @is_admin()
-    @discord.slash_command(
-        guild_only=True, guild_ids=[656899959035133972, 1054741800671252532]
+    @notification_channel.command(
+        description="Print the Notification Channel for this Guild."
     )
-    async def get_notification_channel(self, ctx):
+    async def print(self, ctx):
         guild = await DiscordGuild.get(id=ctx.author.guild.id)
         channel = self.bot.get_channel(guild.notification_channel)
         await ctx.respond(
