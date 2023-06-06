@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "mako"
+version = "0.1.0"
+description = "Multipurpose DiscordBot"
+authors = ["Murasko <github@murasko.de>"]
+license = "GPL-3.0 license"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+py-cord = "2.4.1"
+twitchapi = "3.11.0"
+tortoise-orm = "0.19.3"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+flake8 = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
