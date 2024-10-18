@@ -1,0 +1,16 @@
+version: '3'
+services:
+  mako:
+    image: mako
+    container_name: mako
+    environment:
+      DISCORD_TOKEN: ""
+      
+      TWITCH_CLIENT_ID: ""
+      TWITCH_CLIENT_SECRET: ""
+      
+      # DEBUG, INFO, WARNING, ERROR, CRITICAL - WARNING is default
+      # LOG_LEVEL: "WARNING"
+    volumes:
+      # Mount folder to receive logs, if not set logs will be sent to /dev/null
+      - ~/makologs:/mako/logs

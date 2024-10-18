@@ -1,0 +1,44 @@
+# Byte-compiled / optimized Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# Virtual environment
+venv/
+.pipenv/
+
+# Compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Build directories
+build/
+dist/
+
+# Version control
+.git
+.gitignore
+.gitattributes
+.pre-commit-config.yaml
+
+# Editor/IDE specific files
+.idea/
+.vscode/
+.devcontainer
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+
+# Environment
+.env*
+
+# Misc
