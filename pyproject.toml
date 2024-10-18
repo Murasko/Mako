@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mako"
-version = "0.1.0"
+version = "0.1.1"
 description = "Multipurpose DiscordBot"
 authors = ["Murasko <github@murasko.de>"]
 license = "GPL-3.0 license"
@@ -10,7 +10,7 @@ readme = "README.md"
 python = "^3.11"
 py-cord = "2.5"
 twitchapi = "3.11.0"
-tortoise-orm = "0.19.3"
+tortoise-orm = "0.20"
 python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]

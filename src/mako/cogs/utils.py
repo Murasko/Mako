@@ -88,7 +88,10 @@ class Utils(commands.Cog):
         admins = []
         for admin in admin_ids:
             user = self.bot.get_user(admin)
-            admins.append(f"ID: {admin} / Name: {user.name}#{user.discriminator}")
+            if user.is_migrated:
+                admins.append(f"ID: {admin} / Name: {user.global_name}")
+            else:
+                admins.append(f"ID: {admin} / Name: {user.name}#{user.discriminator}")
         format_admins = "\n".join(admins)
         if not admins:
             await ctx.respond(f"There are currently no users added as admins.")
