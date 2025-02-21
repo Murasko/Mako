@@ -68,7 +68,8 @@ class Utils(commands.Cog):
         roles = [role.name for role in member.roles]
         roles.remove("@everyone")
 
-        embed = discord.Embed(title=f" {member}", colour=discord.Colour.random())
+        embed = discord.Embed(
+            title=f" {member}", colour=discord.Colour.random())
         embed.set_thumbnail(url=user_avatar)
         embed.add_field(
             name="Joined Server: ", value=member.joined_at.strftime("%d/%m/%Y")
@@ -76,7 +77,8 @@ class Utils(commands.Cog):
         embed.add_field(
             name="Joined Discord: ", value=member.created_at.strftime("%d/%m/%Y")
         )
-        embed.add_field(name="Roles: ", value=str(", ".join(roles)), inline=False)
+        embed.add_field(name="Roles: ", value=str(
+            ", ".join(roles)), inline=False)
 
         await ctx.respond(embed=embed)
 
@@ -91,7 +93,8 @@ class Utils(commands.Cog):
             if user.is_migrated:
                 admins.append(f"ID: {admin} / Name: {user.global_name}")
             else:
-                admins.append(f"ID: {admin} / Name: {user.name}#{user.discriminator}")
+                admins.append(
+                    f"ID: {admin} / Name: {user.name}#{user.discriminator}")
         format_admins = "\n".join(admins)
         if not admins:
             await ctx.respond(f"There are currently no users added as admins.")
@@ -135,9 +138,12 @@ class Utils(commands.Cog):
     async def print(self, ctx):
         guild = await DiscordGuild.get(id=ctx.author.guild.id)
         channel = self.bot.get_channel(guild.notification_channel)
-        await ctx.respond(
-            f"Current notification channel: \nName: {channel} // ID: {channel.id}"
-        )
+        if not channel:
+            await ctx.respond("No notification channel set.")
+        else:
+            await ctx.respond(
+                f"Current notification channel: \nName: {channel} // ID: {channel.id}"
+            )
 
 
 def setup(bot):

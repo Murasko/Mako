@@ -34,7 +34,7 @@ class TwitchNotification(commands.Cog):
         self.send_live_notification.start()
 
     watchlist = discord.SlashCommandGroup(
-        "watchlist", "Modify the watchlist to get Twitch notifications", guild_only=True
+        "watchlist", "Modify the watchlist to get Twitch notifications", context="guild"
     )
 
     @tasks.loop(hours=6)
@@ -84,9 +84,11 @@ class TwitchNotification(commands.Cog):
                             url=f"https://www.twitch.tv/{stream.user_login}",
                         )
                         embed.set_author(name="Mako")
-                        embed.set_thumbnail(url=twitch_user.profile_picture_url)
+                        embed.set_thumbnail(
+                            url=twitch_user.profile_picture_url)
                         embed.add_field(name="Titel: ", value=stream.title)
-                        embed.add_field(name="Spielt: ", value=stream.game_name)
+                        embed.add_field(name="Spielt: ",
+                                        value=stream.game_name)
                         embed.set_image(
                             url=stream.thumbnail_url.replace("{width}", "960").replace(
                                 "{height}", "675"

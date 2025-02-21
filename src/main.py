@@ -55,7 +55,8 @@ class Mako(discord.Bot):
         print(f"Logged in as {bot.user}")
         print(f"py-cord API version: {discord.__version__}")
         print(f"Python version: {platform.python_version()}")
-        print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
+        print(
+            f"Running on: {platform.system()} {platform.release()} ({os.name})")
         print()
         await change_discord_status()
         print()
@@ -78,10 +79,7 @@ async def init_database() -> None:
 
 async def guild_init() -> None:
     for current_guild in bot.guilds:
-        if not current_guild.system_channel:
-            notification_channel = 0
-        else:
-            notification_channel = current_guild.system_channel.id
+        notification_channel = current_guild.system_channel.id if current_guild.system_channel else 0
         if not await DiscordGuild.filter(id=current_guild.id).exists():
             owner_id = current_guild.owner.id
             if not await DiscordUser.filter(user_id=current_guild.owner.id).exists():
